@@ -346,13 +346,13 @@ export const CONFIGS_VISTO: ConfigVisto[] = [
 // ─── Logística ────────────────────────────────────────────────────────────────
 
 export const TAREFAS_LOGISTICA_INICIAIS: TarefaLogistica[] = [
-  { id: 'log1', titulo: 'Emissão da Carta Convite / Termo de Responsabilidade', descricao: 'Documento registrado em cartório/notário português atestando alojamento do casal.', responsavel: 'ANFITRIAO', status: 'Pendente' },
-  { id: 'log2', titulo: 'Representante Fiscal para NIF', descricao: 'Ir presencialmente às Finanças em Coimbra ou via Portal das Finanças.', responsavel: 'ANFITRIAO', status: 'Em Andamento' },
-  { id: 'log3', titulo: 'Atestado de Morada (Junta de Freguesia)', descricao: 'Comprovar residência em Coimbra junto à Junta de Freguesia local.', responsavel: 'ANFITRIAO', status: 'Pendente' },
-  { id: 'log4', titulo: 'Solicitar PB4 / CDAM no Brasil', descricao: 'Portal do Ministério da Saúde · Também necessário para a Andressa.', responsavel: 'TITULAR', status: 'Pendente' },
-  { id: 'log5', titulo: 'Abrir Conta Bancária (Millennium BCP)', descricao: 'Conta para não-residente · Necessita NIF emitido.', responsavel: 'TITULAR', status: 'Pendente' },
-  { id: 'log6', titulo: 'Registrar NISS (Segurança Social)', descricao: 'Necessário para contrato de trabalho · Depende do NIF.', responsavel: 'TITULAR', status: 'Pendente' },
-  { id: 'log7', titulo: 'Reagrupamento Familiar (Andressa)', descricao: 'Entrada no processo de AR para cônjuge com permissão de trabalho.', responsavel: 'AMBOS', status: 'Pendente' },
+  { id: 'log1', titulo: 'Carta Convite / Termo de Responsabilidade', descricao: 'Documento registrado em cartório/notário português atestando alojamento.', responsavel: 'Alexandre', status: 'Pendente' },
+  { id: 'log2', titulo: 'Representante Fiscal para NIF', descricao: 'Ir presencialmente às Finanças em Coimbra ou via Portal das Finanças.', responsavel: 'Alexandre', status: 'Em Andamento' },
+  { id: 'log3', titulo: 'Atestado de Morada (Junta de Freguesia)', descricao: 'Comprovar residência em Coimbra junto à Junta de Freguesia local.', responsavel: 'Alexandre', status: 'Pendente' },
+  { id: 'log4', titulo: 'Solicitar PB4 / CDAM no Brasil', descricao: 'Portal do Ministério da Saúde · Também necessário para a Andressa.', responsavel: 'Alexandre', status: 'Pendente' },
+  { id: 'log5', titulo: 'Abrir Conta Bancária (Millennium BCP)', descricao: 'Conta para não-residente · Necessita NIF emitido.', responsavel: 'Alexandre', status: 'Pendente' },
+  { id: 'log6', titulo: 'Registrar NISS (Segurança Social)', descricao: 'Necessário para contrato de trabalho · Depende do NIF.', responsavel: 'Alexandre', status: 'Pendente' },
+  { id: 'log7', titulo: 'Reagrupamento Familiar (Andressa)', descricao: 'Entrada no processo de AR para cônjuge com permissão de trabalho.', responsavel: 'Alexandre & Andressa', status: 'Pendente' },
 ]
 
 // ─── Constantes de Layout ─────────────────────────────────────────────────────

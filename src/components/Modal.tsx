@@ -5,17 +5,30 @@ interface ModalProps {
   onFechar: () => void
   titulo: string
   children: ReactNode
+  tamanho?: 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl'
 }
 
-export function Modal({ aberto, onFechar, titulo, children }: ModalProps) {
+export function Modal({ aberto, onFechar, titulo, children, tamanho = '2xl' }: ModalProps) {
   if (!aberto) return null
+
+  const classesTamanho: Record<string, string> = {
+    md: 'max-w-md',
+    lg: 'max-w-lg',
+    xl: 'max-w-xl',
+    '2xl': 'max-w-2xl',
+    '3xl': 'max-w-3xl',
+    '4xl': 'max-w-4xl',
+  }
+
+  const maxWClass = classesTamanho[tamanho] || 'max-w-2xl'
+
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" onClick={onFechar}>
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fadeIn" />
       {/* Content */}
       <div
-        className="relative bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-md max-h-[85vh] overflow-y-auto animate-slideUp"
+        className={`relative bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl w-full ${maxWClass} max-h-[88vh] overflow-y-auto animate-slideUp`}
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800">

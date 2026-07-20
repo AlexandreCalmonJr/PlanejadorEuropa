@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import type { Vaga, AnexoDocumento } from '../types'
 import { fmtK, COTACAO_EURO } from '../helpers'
-import { COLUNAS_KANBAN, CORES_COLUNAS_KANBAN } from '../data'
+import { COLUNAS_KANBAN } from '../data'
 import { Modal } from './Modal'
 import { FileUploader } from './FileUploader'
 import { IconeLixeira } from './Icons'
@@ -23,9 +23,9 @@ export function JobDetailModal({ vaga, onFechar, onSalvar, onRemover }: JobDetai
 
   if (!vaga || !formData) return null
 
-  const handleSalvar = () => {
-    if (formData) {
-      onSalvar(formData)
+  const handleSalvar = (atualizado = formData) => {
+    if (atualizado) {
+      onSalvar(atualizado)
     }
   }
 
@@ -33,14 +33,14 @@ export function JobDetailModal({ vaga, onFechar, onSalvar, onRemover }: JobDetai
     const novosAnexos = [...(formData.anexos || []), anexo]
     const atualizado = { ...formData, anexos: novosAnexos }
     setFormData(atualizado)
-    onSalvar(atualizado)
+    handleSalvar(atualizado)
   }
 
   const handleRemoverAnexo = (id: string) => {
     const novosAnexos = (formData.anexos || []).filter(a => a.id !== id)
     const atualizado = { ...formData, anexos: novosAnexos }
     setFormData(atualizado)
-    onSalvar(atualizado)
+    handleSalvar(atualizado)
   }
 
   const handleAdicionarStack = () => {
@@ -50,7 +50,7 @@ export function JobDetailModal({ vaga, onFechar, onSalvar, onRemover }: JobDetai
       const novaStack = [...stackAtual, novaTagStack.trim()]
       const atualizado = { ...formData, stack: novaStack }
       setFormData(atualizado)
-      onSalvar(atualizado)
+      handleSalvar(atualizado)
     }
     setNovaTagStack('')
   }
@@ -59,77 +59,157 @@ export function JobDetailModal({ vaga, onFechar, onSalvar, onRemover }: JobDetai
     const novaStack = (formData.stack || []).filter(t => t !== tag)
     const atualizado = { ...formData, stack: novaStack }
     setFormData(atualizado)
-    onSalvar(atualizado)
+    handleSalvar(atualizado)
   }
 
   const salarioMedioEur = Math.round((formData.salarioMin + formData.salarioMax) / 2)
   const salarioMensalBrl = Math.round((salarioMedioEur / 12) * COTACAO_EURO)
 
   return (
-    <Modal aberto={Boolean(vaga)} onFechar={onFechar} titulo="Detalhes da Candidatura">
-      <div className="space-y-6 text-slate-100">
-        {/* Cabecalho Principal */}
-        <div className="flex items-start justify-between gap-4 border-b border-slate-800 pb-4">
-          <div className="flex items-center gap-3">
-            <div
-              className="w-12 h-12 rounded-xl flex items-center justify-center text-white text-lg font-bold shrink-0 shadow-lg"
-              style={{ background: formData.cor }}
-            >
-              {formData.inicial}
-            </div>
-            <div>
-              <h2 className="text-xl font-bold text-slate-100 leading-tight">{formData.empresa}</h2>
-              <p className="text-sm text-teal-400 font-medium">{formData.cargo}</p>
-              <div className="flex items-center gap-2 mt-1">
-                {formData.cidade && (
-                  <span className="text-xs text-slate-400 flex items-center gap-1">📍 {formData.cidade}, PT</span>
-                )}
-                {formData.modelo && (
-                  <span className="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
-                    💻 {formData.modelo}
-                  </span>
-                )}
-              </div>
-            </div>
+    <Modal aberto={Boolean(vaga)} onFechar={onFechar} titulo="Editar & Detalhes da Vaga">
+      <div className="space-y-5 text-slate-100">
+        {/* Dados Principais Editaveis */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider block mb-1">
+              Empresa
+            </label>
+            <input
+              type="text"
+              value={formData.empresa}
+              onChange={e => setFormData({ ...formData, empresa: e.target.value, inicial: e.target.value.charAt(0).toUpperCase() })}
+              onBlur={() => handleSalvar()}
+              className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs font-bold text-slate-100 focus:outline-none focus:border-teal-500"
+            />
           </div>
 
-          <div className="flex flex-col items-end gap-1.5">
-            <span
-              className="text-xs font-semibold px-2.5 py-1 rounded-full text-white shadow-sm"
-              style={{ background: CORES_COLUNAS_KANBAN[formData.coluna] }}
-            >
-              {formData.coluna}
-            </span>
-            {formData.patrocinioVisto && (
-              <span className="text-[11px] px-2 py-0.5 rounded-md bg-teal-500/10 text-teal-400 border border-teal-500/20 font-medium">
-                ✦ Patrocina Visto D3
-              </span>
-            )}
+          <div>
+            <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider block mb-1">
+              Cargo / Posição
+            </label>
+            <input
+              type="text"
+              value={formData.cargo}
+              onChange={e => setFormData({ ...formData, cargo: e.target.value })}
+              onBlur={() => handleSalvar()}
+              className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs font-bold text-teal-400 focus:outline-none focus:border-teal-500"
+            />
           </div>
         </div>
 
-        {/* Resumo Financeiro & Salario */}
-        <div className="grid grid-cols-2 gap-3 p-4 bg-slate-900/90 border border-slate-800 rounded-2xl">
+        {/* Modelo de Trabalho, Cidade, Responsavel e Patrocinio */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <div>
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Faixa Salarial Anual</p>
-            <p className="text-lg font-extrabold text-slate-100 mt-0.5">
-              {fmtK(formData.salarioMin)} – {fmtK(formData.salarioMax)} <span className="text-xs text-slate-400 font-normal">/ano</span>
-            </p>
+            <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider block mb-1">
+              Modelo
+            </label>
+            <select
+              value={formData.modelo || 'Híbrido'}
+              onChange={e => {
+                const at = { ...formData, modelo: e.target.value }
+                setFormData(at)
+                handleSalvar(at)
+              }}
+              className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-teal-500"
+            >
+              <option value="Híbrido">💻 Híbrido</option>
+              <option value="Presencial">🏢 Presencial</option>
+              <option value="Remoto">🏠 Remoto</option>
+            </select>
           </div>
+
           <div>
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Média Mensal (BRL)</p>
-            <p className="text-lg font-extrabold text-emerald-400 mt-0.5">
-              ~R$ {salarioMensalBrl.toLocaleString('pt-BR')}{' '}
-              <span className="text-xs text-slate-400 font-normal">/mês</span>
-            </p>
+            <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider block mb-1">
+              Cidade
+            </label>
+            <input
+              type="text"
+              placeholder="Ex: Coimbra, Lisboa"
+              value={formData.cidade || ''}
+              onChange={e => setFormData({ ...formData, cidade: e.target.value })}
+              onBlur={() => handleSalvar()}
+              className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-teal-500"
+            />
           </div>
+
+          <div>
+            <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider block mb-1">
+              Responsável
+            </label>
+            <select
+              value={formData.responsavel || 'Alexandre'}
+              onChange={e => {
+                const at = { ...formData, responsavel: e.target.value }
+                setFormData(at)
+                handleSalvar(at)
+              }}
+              className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-teal-500 font-medium"
+            >
+              <option value="Alexandre">👤 Alexandre</option>
+              <option value="Andressa">👩 Andressa</option>
+              <option value="Ambos">👥 Ambos</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider block mb-1">
+              Patrocínio Visto
+            </label>
+            <button
+              type="button"
+              onClick={() => {
+                const at = { ...formData, patrocinioVisto: !formData.patrocinioVisto }
+                setFormData(at)
+                handleSalvar(at)
+              }}
+              className={`w-full py-2 px-3 rounded-xl border text-xs font-bold transition-all ${
+                formData.patrocinioVisto
+                  ? 'bg-teal-500/20 border-teal-500 text-teal-300'
+                  : 'bg-slate-900 border-slate-800 text-slate-400'
+              }`}
+            >
+              {formData.patrocinioVisto ? 'Sim (Patrocina)' : 'Não'}
+            </button>
+          </div>
+        </div>
+
+        {/* Resumo Financeiro & Salario Editavel */}
+        <div className="p-4 bg-slate-900/90 border border-slate-800 rounded-2xl space-y-3">
+          <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider block">
+            Faixa Salarial Anual (€ EUR)
+          </label>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <span className="text-[11px] text-slate-400">Mínimo Anual (€)</span>
+              <input
+                type="number"
+                value={formData.salarioMin}
+                onChange={e => setFormData({ ...formData, salarioMin: Number(e.target.value) })}
+                onBlur={() => handleSalvar()}
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-teal-500 font-bold"
+              />
+            </div>
+            <div>
+              <span className="text-[11px] text-slate-400">Máximo Anual (€)</span>
+              <input
+                type="number"
+                value={formData.salarioMax}
+                onChange={e => setFormData({ ...formData, salarioMax: Number(e.target.value) })}
+                onBlur={() => handleSalvar()}
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-teal-500 font-bold"
+              />
+            </div>
+          </div>
+          <p className="text-xs text-slate-400 pt-1">
+            Média de <strong className="text-teal-400">{fmtK(salarioMedioEur)}/ano</strong> (~R$ {salarioMensalBrl.toLocaleString('pt-BR')}/mês)
+          </p>
         </div>
 
         {/* Stack Tecnológica */}
         <div>
-          <div className="flex items-center justify-between mb-2">
-            <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">Stack & Tecnologias</label>
-          </div>
+          <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider block mb-1.5">
+            Stack & Tecnologias
+          </label>
           <div className="flex flex-wrap gap-1.5 mb-2">
             {(formData.stack || []).map(tag => (
               <span
@@ -179,7 +259,7 @@ export function JobDetailModal({ vaga, onFechar, onSalvar, onRemover }: JobDetai
                 onClick={() => {
                   const atualizado = { ...formData, coluna: col }
                   setFormData(atualizado)
-                  onSalvar(atualizado)
+                  handleSalvar(atualizado)
                 }}
                 className={`px-3 py-2 rounded-xl text-xs font-medium border transition-all text-center ${
                   formData.coluna === col
@@ -204,7 +284,7 @@ export function JobDetailModal({ vaga, onFechar, onSalvar, onRemover }: JobDetai
               placeholder="https://linkedin.com/jobs/..."
               value={formData.linkVaga || ''}
               onChange={e => setFormData({ ...formData, linkVaga: e.target.value })}
-              onBlur={handleSalvar}
+              onBlur={() => handleSalvar()}
               className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-teal-500"
             />
           </div>
@@ -218,7 +298,7 @@ export function JobDetailModal({ vaga, onFechar, onSalvar, onRemover }: JobDetai
               placeholder="Digite impressões, nome dos recrutadores, próximos passos..."
               value={formData.observacoes || ''}
               onChange={e => setFormData({ ...formData, observacoes: e.target.value })}
-              onBlur={handleSalvar}
+              onBlur={() => handleSalvar()}
               className="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 focus:outline-none focus:border-teal-500 resize-none leading-relaxed"
             />
           </div>
@@ -248,7 +328,7 @@ export function JobDetailModal({ vaga, onFechar, onSalvar, onRemover }: JobDetai
             onClick={onFechar}
             className="px-4 py-2 bg-teal-500 text-slate-950 font-bold text-xs rounded-xl hover:bg-teal-400 transition-all"
           >
-            Concluído
+            Salvar & Fechar
           </button>
         </div>
       </div>

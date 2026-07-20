@@ -54,6 +54,7 @@ export interface Vaga {
   linkVaga?: string
   contato?: string
   observacoes?: string
+  responsavel?: string
   anexos?: AnexoDocumento[]
 }
 
@@ -83,6 +84,7 @@ export interface Faculdade {
   requisitosEntrada?: string
   prazoInscricao?: string
   linkSite?: string
+  responsavel?: string
   anexos?: AnexoDocumento[]
 }
 
@@ -110,6 +112,9 @@ export interface ItemFinanceiro {
   tipo: 'receita' | 'despesa'
   categoria: string
   recorrente?: boolean
+  banco?: string
+  comprovanteEntrada?: boolean
+  anexos?: AnexoDocumento[]
 }
 
 // ─── Visto & Múltiplos Vistos ───────────────────────────────────────────
@@ -156,15 +161,15 @@ export interface ConfigVisto {
 }
 
 // ─── Logística ────────────────────────────────────────────────────────────────
-export type ResponsavelTarefa = 'ANFITRIAO' | 'TITULAR' | 'AMBOS'
-
 export interface TarefaLogistica {
   id: string
   titulo: string
   descricao: string
-  responsavel: ResponsavelTarefa
+  responsavel: string
   status: StatusDoc
   dataConclusao?: string
+  observacoes?: string
+  anexos?: AnexoDocumento[]
 }
 
 // ─── Prazos ───────────────────────────────────────────────────────────────────

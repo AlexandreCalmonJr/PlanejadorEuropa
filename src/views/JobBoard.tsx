@@ -183,6 +183,11 @@ function CartaoVaga({ vaga, arrastando, onDragStart, onDragEnd, onClick, onRemov
       </div>
 
       <div className="flex flex-wrap gap-1.5">
+        {vaga.responsavel && (
+          <span className="inline-flex items-center text-[11px] px-2 py-0.5 rounded-md bg-violet-500/10 text-violet-300 border border-violet-500/20 font-medium">
+            👤 {vaga.responsavel}
+          </span>
+        )}
         {vaga.patrocinioVisto && (
           <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-md bg-teal-500/10 text-teal-400 border border-teal-500/20 font-medium">
             ✦ Patrocina Visto

@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS public.vagas (
   stack TEXT[],
   observacoes TEXT,
   link_vaga TEXT,
+  responsavel TEXT,
   anexos JSONB DEFAULT '[]'::jsonb,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -51,6 +52,7 @@ CREATE TABLE IF NOT EXISTS public.faculdades (
   coluna TEXT NOT NULL CHECK (coluna IN ('Pesquisando', 'Candidatura', 'Aguardando', 'Aceito')),
   cor VARCHAR(20) NOT NULL DEFAULT '#0284C7',
   observacao TEXT,
+  responsavel TEXT,
   anexos JSONB DEFAULT '[]'::jsonb,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -84,6 +86,9 @@ CREATE TABLE IF NOT EXISTS public.itens_financeiros (
   tipo TEXT NOT NULL CHECK (tipo IN ('receita', 'despesa')),
   categoria TEXT NOT NULL,
   recorrente BOOLEAN DEFAULT false,
+  banco TEXT,
+  comprovante_entrada BOOLEAN DEFAULT false,
+  anexos JSONB DEFAULT '[]'::jsonb,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -122,6 +127,8 @@ CREATE TABLE IF NOT EXISTS public.tarefas_logistica (
   responsavel TEXT NOT NULL CHECK (responsavel IN ('ANFITRIAO', 'TITULAR', 'AMBOS')),
   status TEXT NOT NULL CHECK (status IN ('Concluído', 'Em Andamento', 'Pendente', 'Bloqueado')),
   data_conclusao TEXT,
+  observacoes TEXT,
+  anexos JSONB DEFAULT '[]'::jsonb,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

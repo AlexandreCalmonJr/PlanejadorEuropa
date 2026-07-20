@@ -238,6 +238,11 @@ function CartaoFaculdade({ fac, arrastando, onDragStart, onDragEnd, onClick, onR
 
       <div className="flex flex-wrap gap-1.5">
         <BadgePais pais={fac.pais} />
+        {fac.responsavel && (
+          <span className="text-[11px] px-2 py-0.5 rounded-md bg-violet-500/10 text-violet-300 border border-violet-500/20 font-medium">
+            👤 {fac.responsavel}
+          </span>
+        )}
         {fac.bolsaCplp && (
           <span className="text-[11px] px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">
             CPLP

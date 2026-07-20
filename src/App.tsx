@@ -14,7 +14,7 @@ import {
 
 import { Sidebar } from './components/Sidebar'
 import { AuthLockScreen } from './components/AuthLockScreen'
-import { carregarDoSupabase, isSupabaseConfigured } from './lib/supabase'
+import { carregarDoSupabase, isSupabaseConfigured, supabase } from './lib/supabase'
 import { Overview } from './views/Overview'
 import { JobBoard } from './views/JobBoard'
 import { EducationBoard } from './views/EducationBoard'
@@ -39,6 +39,26 @@ export default function App() {
   const [docsConsulado, setDocsConsulado] = useLocalStorage<DocConsulado[]>('ep_docs_consulado', DOCS_CONSULADO_INICIAIS)
   const [tarefasLogistica, setTarefasLogistica] = useLocalStorage<TarefaLogistica[]>('ep_logistica', TAREFAS_LOGISTICA_INICIAIS)
   const [voos, setVoos] = useLocalStorage<Voo[]>('ep_voos', [])
+
+  // Monitora login/logout via Supabase Auth (ex: Google OAuth)
+  useEffect(() => {
+    if (!supabase) return
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setAutenticado(true)
+        sessionStorage.setItem('ep_autenticado', 'true')
+      }
+    })
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setAutenticado(true)
+        sessionStorage.setItem('ep_autenticado', 'true')
+      }
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
 
   // Carrega dados do Supabase se configurado
   useEffect(() => {

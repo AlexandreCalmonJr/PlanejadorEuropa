@@ -50,26 +50,26 @@ export function EducationDetailModal({ faculdade, onFechar, onSalvar, onRemover 
   const parcelaMensalBrl = parcelaMensalEur ? Math.round(parcelaMensalEur * COTACAO_EURO) : null
 
   return (
-    <Modal aberto={Boolean(faculdade)} onFechar={onFechar} titulo="Detalhes da Universidade">
+    <Modal aberto={Boolean(faculdade)} onFechar={onFechar} titulo="Detalhes da Universidade" tamanho="3xl">
       <div className="space-y-6 text-slate-100">
         {/* Cabecalho Principal */}
-        <div className="flex items-start justify-between gap-4 border-b border-slate-800 pb-4">
-          <div className="flex items-center gap-3">
+        <div className="flex items-start justify-between gap-4 flex-wrap border-b border-slate-800 pb-4">
+          <div className="flex items-start gap-3 min-w-0 flex-1">
             <div
-              className="w-12 h-12 rounded-xl flex items-center justify-center text-white text-lg font-bold shrink-0 shadow-lg"
+              className="w-12 h-12 rounded-xl flex items-center justify-center text-white text-lg font-bold shrink-0 shadow-lg mt-0.5"
               style={{ background: formData.cor }}
             >
               🎓
             </div>
-            <div>
-              <div className="flex items-center gap-2">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2 flex-wrap">
                 <h2 className="text-xl font-bold text-slate-100 leading-tight">{formData.instituicao}</h2>
                 <BadgePais pais={formData.pais} />
               </div>
-              <p className="text-sm text-violet-400 font-medium">{formData.curso}</p>
-              <div className="flex items-center gap-2 mt-1">
+              <p className="text-sm text-violet-400 font-medium mt-0.5">{formData.curso}</p>
+              <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                 <span className="text-xs text-slate-400">📍 {formData.cidade}, {formData.pais}</span>
-                <span className="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
+                <span className="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700 font-medium">
                   {formData.tipoCurso}
                 </span>
                 <span className="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-400">
@@ -79,12 +79,31 @@ export function EducationDetailModal({ faculdade, onFechar, onSalvar, onRemover 
             </div>
           </div>
 
-          <span
-            className="text-xs font-semibold px-2.5 py-1 rounded-full text-white shadow-sm shrink-0"
-            style={{ background: CORES_COLUNAS_FACULDADE[formData.coluna] }}
-          >
-            {formData.coluna}
-          </span>
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="flex items-center gap-1.5 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800">
+              <span className="text-xs text-slate-400 font-medium">Responsável:</span>
+              <select
+                value={formData.responsavel || 'Alexandre'}
+                onChange={e => {
+                  const at = { ...formData, responsavel: e.target.value }
+                  setFormData(at)
+                  onSalvar(at)
+                }}
+                className="bg-transparent text-xs text-violet-300 font-bold focus:outline-none cursor-pointer"
+              >
+                <option value="Alexandre" className="bg-slate-900 text-slate-100">👤 Alexandre</option>
+                <option value="Andressa" className="bg-slate-900 text-slate-100">👩 Andressa</option>
+                <option value="Ambos" className="bg-slate-900 text-slate-100">👥 Ambos</option>
+              </select>
+            </div>
+
+            <span
+              className="text-xs font-bold px-3 py-1.5 rounded-xl text-white shadow-sm"
+              style={{ background: CORES_COLUNAS_FACULDADE[formData.coluna] }}
+            >
+              {formData.coluna}
+            </span>
+          </div>
         </div>
 
         {/* Quadro de Custos & Propinas */}

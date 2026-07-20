@@ -46,19 +46,35 @@ export async function salvarItemSupabase<T extends { id: string }>(tabela: strin
 }
 
 /**
- * Remove um item de uma tabela do Supabase.
+ * Inicia a autenticacao com Google OAuth no Supabase.
  */
-export async function removerItemSupabase(tabela: string, id: string): Promise<boolean> {
-  if (!supabase) return false
+export async function loginComGoogle(): Promise<boolean> {
+  if (!supabase) {
+    alert('Supabase nao configurado. Preencha VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY para usar Login com Google.')
+    return false
+  }
   try {
-    const { error } = await supabase.from(tabela).delete().eq('id', id)
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin,
+      },
+    })
     if (error) {
-      console.warn(`[Supabase] Erro ao remover de ${tabela}:`, error.message)
+      alert(`Erro no Login Google: ${error.message}`)
       return false
     }
     return true
   } catch (err) {
-    console.warn(`[Supabase] Falha ao excluir item em ${tabela}:`, err)
+    console.error('Erro ao conectar com Google Auth:', err)
     return false
   }
+}
+
+/**
+ * Encerra a sessao de usuario no Supabase.
+ */
+export async function logoutSupabase(): Promise<void> {
+  if (!supabase) return
+  await supabase.auth.signOut()
 }
