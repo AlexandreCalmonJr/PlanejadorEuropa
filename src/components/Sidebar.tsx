@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useState, useEffect, type ReactNode } from 'react'
 import type { View, Vaga, Faculdade, Documento } from '../types'
 import { IconeGrade, IconeKanban, IconeArquivo, IconeCarteira, IconePassaporte, IconeGraduacao, IconeLogistica, IconeVoo, IconeDemo, IconeTutorial, IconeNotas, IconeCalendario } from './Icons'
 import { useLocalStorage } from '../hooks/useLocalStorage'
@@ -56,6 +56,26 @@ export function Sidebar({
   const [menuMobileAberto, setMenuMobileAberto] = useState(false)
   const [buscaGlobal, setBuscaGlobal] = useState('')
   const [buscaFoco, setBuscaFoco] = useState(false)
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      e.preventDefault()
+      setDeferredPrompt(e)
+    }
+    window.addEventListener('beforeinstallprompt', handler)
+    return () => window.removeEventListener('beforeinstallprompt', handler)
+  }, [])
+
+  const instolarPWA = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt()
+      const { outcome } = await deferredPrompt.userChoice
+      if (outcome === 'accepted') setDeferredPrompt(null)
+    } else {
+      alert('📲 Para instalar o EuroPlanner:\n\n• No Android/Chrome: Clique nos 3 pontos e escolha "Instalar Aplicativo".\n• No iPhone/Safari: Toque no botão Compartilhar e escolha "Adicionar à Tela de Início".\n• No Computador: Clique no ícone de instalar na barra de endereço do navegador.')
+    }
+  }
 
   const getBadgeValue = (key?: string) => {
     if (key === 'vagas') return vagasCount > 0 ? String(vagasCount) : null
@@ -240,6 +260,18 @@ export function Sidebar({
 
           <button
             type="button"
+            onClick={instolarPWA}
+            title="Instalar EuroPlanner como aplicativo"
+            className={`w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-semibold text-teal-300 bg-teal-500/10 hover:bg-teal-500/20 border border-teal-500/20 transition-all ${
+              recuada ? 'px-0' : ''
+            }`}
+          >
+            <span>📲</span>
+            {!recuada && <span>Instalar App PWA</span>}
+          </button>
+
+          <button
+            type="button"
             onClick={onSair}
             title="Sair da conta / Bloquear painel"
             className={`w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-semibold text-red-400 hover:bg-red-500/10 border border-red-500/20 hover:border-red-500/30 transition-all ${
@@ -343,7 +375,7 @@ export function Sidebar({
             </div>
 
             {/* Perfil & Sair */}
-            <div className="pt-3 border-t border-slate-800 flex items-center justify-between gap-3">
+            <div className="pt-3 border-t border-slate-800 flex items-center justify-between gap-2 flex-wrap">
               <div className="flex items-center gap-2.5 min-w-0">
                 <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 shadow-sm" style={{ background: 'linear-gradient(135deg, #14B8A6, #0284C7)' }}>
                   <span className="text-white text-xs font-semibold">AC</span>
@@ -354,16 +386,25 @@ export function Sidebar({
                 </div>
               </div>
 
-              <button
-                type="button"
-                onClick={() => {
-                  setMenuMobileAberto(false)
-                  onSair()
-                }}
-                className="px-3 py-2 rounded-xl text-xs font-bold text-red-400 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 transition-all flex items-center gap-1.5"
-              >
-                <span>🚪</span> Sair
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={instolarPWA}
+                  className="px-3 py-2 rounded-xl text-xs font-bold text-teal-300 bg-teal-500/10 border border-teal-500/20 hover:bg-teal-500/20 transition-all flex items-center gap-1.5"
+                >
+                  <span>📲</span> Instalar App
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMenuMobileAberto(false)
+                    onSair()
+                  }}
+                  className="px-3 py-2 rounded-xl text-xs font-bold text-red-400 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 transition-all flex items-center gap-1.5"
+                >
+                  <span>🚪</span> Sair
+                </button>
+              </div>
             </div>
           </div>
         </div>
