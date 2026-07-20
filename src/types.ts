@@ -28,6 +28,9 @@ export interface Voo {
   valorEUR: number
   bagagemMao: boolean
   bagagensDespachadas: number
+  detalheBagagem?: string
+  assentos?: string
+  passageiros?: string
   codigoReserva?: string
   observacoes?: string
   anexos?: AnexoDocumento[]

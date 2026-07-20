@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { Voo, AnexoDocumento } from '../types'
 import { fmt, gerarId, COTACAO_EURO } from '../helpers'
 import { IconeMais, IconeLixeira } from '../components/Icons'
-import { Modal, CampoTexto, CampoNumero, CampoSelect, CampoToggle, BotaoSubmit, useModal } from '../components/Modal'
+import { Modal, CampoTexto, CampoNumero, CampoSelect, BotaoSubmit, useModal } from '../components/Modal'
 import { FileUploader } from '../components/FileUploader'
 import { DocumentPreviewModal } from '../components/DocumentPreviewModal'
 
@@ -28,8 +28,9 @@ export function FlightPlanner({ voos, setVoos }: FlightPlannerProps) {
   const [conexoes, setConexoes] = useState<'Direto' | '1 Parada' | '2+ Paradas'>('Direto')
   const [cidadesConexao, setCidadesConexao] = useState('')
   const [valorBRL, setValorBRL] = useState(4500)
-  const [bagagemMao, setBagagemMao] = useState(true)
-  const [bagagensDespachadas, setBagagensDespachadas] = useState(2)
+  const [detalheBagagem, setDetalheBagagem] = useState('1x Mochila 10kg + 1x Mala Bordo 10kg + 2x Despachada 23kg')
+  const [assentos, setAssentos] = useState('12A, 12B')
+  const [passageiros, setPassageiros] = useState('Alexandre & Andressa')
   const [codigoReserva, setCodigoReserva] = useState('')
 
   const totalBRL = voos.reduce((s, v) => s + v.valorBRL, 0)
@@ -52,8 +53,11 @@ export function FlightPlanner({ voos, setVoos }: FlightPlannerProps) {
       cidadesConexao: conexoes !== 'Direto' ? cidadesConexao : undefined,
       valorBRL,
       valorEUR: valorEurCalculado,
-      bagagemMao,
-      bagagensDespachadas,
+      bagagemMao: true,
+      bagagensDespachadas: 2,
+      detalheBagagem,
+      assentos,
+      passageiros,
       codigoReserva,
       anexos: [],
     }
@@ -80,7 +84,7 @@ export function FlightPlanner({ voos, setVoos }: FlightPlannerProps) {
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-2xl font-semibold text-slate-100">Voos & Passagens Aéreas</h1>
-          <p className="text-slate-400 text-sm mt-1">Cotação, itinerários, horários de partida/chegada e e-tickets da viagem</p>
+          <p className="text-slate-400 text-sm mt-1">Passageiros, assentos, limite de bagagem (10kg/23kg), cotações e e-tickets</p>
         </div>
         <button
           onClick={modalNovo.abrir}
@@ -129,19 +133,29 @@ export function FlightPlanner({ voos, setVoos }: FlightPlannerProps) {
                     ✈
                   </div>
                   <div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="text-base font-bold text-slate-100">{voo.ciaAerea}</h3>
                       <span className="text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700 font-medium">
                         {voo.tipoVoo}
                       </span>
+                      {voo.passageiros && (
+                        <span className="text-[11px] px-2 py-0.5 rounded bg-violet-500/10 text-violet-300 border border-violet-500/20 font-semibold">
+                          👤 {voo.passageiros}
+                        </span>
+                      )}
+                      {voo.assentos && (
+                        <span className="text-[11px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20 font-semibold">
+                          💺 {voo.assentos}
+                        </span>
+                      )}
                       {voo.codigoReserva && (
                         <span className="text-[11px] px-2 py-0.5 rounded bg-teal-500/10 text-teal-300 border border-teal-500/20 font-mono font-bold">
                           PNR: {voo.codigoReserva}
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-slate-400 mt-0.5">
-                      {voo.origem} ➔ {voo.destino}
+                    <p className="text-xs text-slate-400 mt-1">
+                      📍 {voo.origem} ➔ {voo.destino}
                     </p>
                   </div>
                 </div>
@@ -182,11 +196,10 @@ export function FlightPlanner({ voos, setVoos }: FlightPlannerProps) {
                   {voo.cidadesConexao && <p className="text-slate-400 truncate">{voo.cidadesConexao}</p>}
                 </div>
                 <div>
-                  <p className="text-slate-500 font-semibold uppercase">Bagagens Incluídas</p>
-                  <p className="text-slate-200 font-bold mt-0.5">
-                    🧳 {voo.bagagensDespachadas}x Despachada (23kg)
+                  <p className="text-slate-500 font-semibold uppercase">Detalhamento de Bagagens</p>
+                  <p className="text-teal-300 font-bold mt-0.5 leading-snug">
+                    🧳 {voo.detalheBagagem || `${voo.bagagensDespachadas}x Despachada (23kg)`}
                   </p>
-                  <p className="text-slate-400">{voo.bagagemMao ? '🎒 Bagagem de Mão OK' : 'Sem bagagem de mão'}</p>
                 </div>
               </div>
 
@@ -216,7 +229,7 @@ export function FlightPlanner({ voos, setVoos }: FlightPlannerProps) {
           <div className="p-12 border-2 border-dashed border-slate-800 rounded-2xl text-center space-y-3">
             <div className="text-4xl">✈</div>
             <p className="text-slate-300 font-semibold text-sm">Nenhum voo ou cotação cadastrada ainda.</p>
-            <p className="text-slate-500 text-xs">Adicione passagens aéreas para comparar preços, horários de partida/chegada e guardar seus bilhetes.</p>
+            <p className="text-slate-500 text-xs">Adicione passagens aéreas para comparar preços, assentos, limites de bagagem e guardar seus bilhetes.</p>
             <button
               onClick={modalNovo.abrir}
               className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-teal-400 bg-teal-500/10 border border-teal-500/20 hover:bg-teal-500/20 transition-all"
@@ -228,8 +241,11 @@ export function FlightPlanner({ voos, setVoos }: FlightPlannerProps) {
       </div>
 
       {/* Modal Novo Voo */}
-      <Modal aberto={modalNovo.aberto} onFechar={modalNovo.fechar} titulo="Novo Voo / Cotação de Passagem">
-        <CampoTexto label="Companhia Aérea" valor={ciaAerea} onChange={setCiaAerea} placeholder="Ex: TAP Air Portugal, Iberia, LATAM" />
+      <Modal aberto={modalNovo.aberto} onFechar={modalNovo.fechar} titulo="Novo Voo / Cotação de Passagem" tamanho="3xl">
+        <div className="grid grid-cols-2 gap-3">
+          <CampoTexto label="Companhia Aérea" valor={ciaAerea} onChange={setCiaAerea} placeholder="Ex: TAP Air Portugal, Iberia, LATAM" />
+          <CampoTexto label="Nome do(s) Passageiro(s)" valor={passageiros} onChange={setPassageiros} placeholder="Ex: Alexandre Calmon, Andressa" />
+        </div>
         <div className="grid grid-cols-2 gap-3">
           <CampoTexto label="Aeroporto de Origem" valor={origem} onChange={setOrigem} placeholder="Ex: SSA — Salvador" />
           <CampoTexto label="Aeroporto de Destino" valor={destino} onChange={setDestino} placeholder="Ex: LIS — Lisboa" />
@@ -257,17 +273,17 @@ export function FlightPlanner({ voos, setVoos }: FlightPlannerProps) {
           <CampoTexto label="Cidades das Conexões" valor={cidadesConexao} onChange={setCidadesConexao} placeholder="Ex: Conexão em Madri (MAD)" />
         )}
         <div className="grid grid-cols-2 gap-3">
-          <CampoNumero label="Valor Total (R$ BRL)" valor={valorBRL} onChange={setValorBRL} />
-          <CampoNumero label="Bagagens Despachadas (23kg)" valor={bagagensDespachadas} onChange={setBagagensDespachadas} />
+          <CampoTexto label="Número dos Assentos" valor={assentos} onChange={setAssentos} placeholder="Ex: 12A, 12B" />
+          <CampoTexto label="Código de Reserva (PNR)" valor={codigoReserva} onChange={setCodigoReserva} placeholder="Ex: X9Y8Z7 (se emitida)" />
         </div>
-        <CampoToggle label="Incluir Bagagem de Mão (Mala de Bordo)" valor={bagagemMao} onChange={setBagagemMao} />
-        <CampoTexto label="Código de Reserva (PNR)" valor={codigoReserva} onChange={setCodigoReserva} placeholder="Ex: X9Y8Z7 (se já emitida)" />
+        <CampoTexto label="Detalhamento de Bagagens (10kg, 23kg, etc)" valor={detalheBagagem} onChange={setDetalheBagagem} placeholder="Ex: Mochila 10kg + Mala de Bordo 10kg + 2x Despachada 23kg" />
+        <CampoNumero label="Valor Total da Passagem (R$ BRL)" valor={valorBRL} onChange={setValorBRL} />
         <BotaoSubmit label="Adicionar Voo" onClick={adicionarVoo} />
       </Modal>
 
       {/* Modal Detalhes e Anexos do Voo */}
       {vooDetalhe && (
-        <Modal aberto={Boolean(vooDetalhe)} onFechar={() => setVooDetalhe(null)} titulo="Detalhes & Bilhete do Voo">
+        <Modal aberto={Boolean(vooDetalhe)} onFechar={() => setVooDetalhe(null)} titulo="Detalhes & Bilhete do Voo" tamanho="3xl">
           <div className="space-y-6">
             <div className="flex items-center justify-between border-b border-slate-800 pb-4">
               <div>
@@ -278,6 +294,73 @@ export function FlightPlanner({ voos, setVoos }: FlightPlannerProps) {
                 <p className="text-lg font-extrabold text-slate-100">{fmt(vooDetalhe.valorBRL, 'BRL')}</p>
                 <p className="text-xs text-slate-400">~{fmt(vooDetalhe.valorEUR, 'EUR')}</p>
               </div>
+            </div>
+
+            {/* Edicao de Passageiro, Assentos e Bagagens */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div>
+                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">
+                  Passageiro(s)
+                </label>
+                <input
+                  type="text"
+                  value={vooDetalhe.passageiros || ''}
+                  onChange={e => {
+                    const at = { ...vooDetalhe, passageiros: e.target.value }
+                    salvarVoo(at)
+                  }}
+                  placeholder="Ex: Alexandre Calmon, Andressa"
+                  className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 font-bold focus:outline-none focus:border-teal-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">
+                  Assento(s)
+                </label>
+                <input
+                  type="text"
+                  value={vooDetalhe.assentos || ''}
+                  onChange={e => {
+                    const at = { ...vooDetalhe, assentos: e.target.value }
+                    salvarVoo(at)
+                  }}
+                  placeholder="Ex: 12A, 12B"
+                  className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-amber-300 font-bold focus:outline-none focus:border-teal-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">
+                  Código Reserva (PNR)
+                </label>
+                <input
+                  type="text"
+                  value={vooDetalhe.codigoReserva || ''}
+                  onChange={e => {
+                    const at = { ...vooDetalhe, codigoReserva: e.target.value }
+                    salvarVoo(at)
+                  }}
+                  placeholder="Ex: X9Y8Z7"
+                  className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-teal-300 font-bold font-mono focus:outline-none focus:border-teal-500"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">
+                Detalhamento de Bagagens (Tipos e Pesos: 10kg, 23kg)
+              </label>
+              <input
+                type="text"
+                value={vooDetalhe.detalheBagagem || ''}
+                onChange={e => {
+                  const at = { ...vooDetalhe, detalheBagagem: e.target.value }
+                  salvarVoo(at)
+                }}
+                placeholder="Ex: 1x Mochila 10kg + 1x Mala de Bordo 10kg + 2x Mala Despachada 23kg"
+                className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-teal-300 font-bold focus:outline-none focus:border-teal-500"
+              />
             </div>
 
             {/* Upload de E-tickets */}
@@ -309,7 +392,7 @@ export function FlightPlanner({ voos, setVoos }: FlightPlannerProps) {
                 onClick={() => setVooDetalhe(null)}
                 className="px-4 py-2 bg-teal-500 text-slate-950 font-bold text-xs rounded-xl"
               >
-                Concluído
+                Salvar & Fechar
               </button>
             </div>
           </div>
