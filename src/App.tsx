@@ -14,7 +14,7 @@ import {
 
 import { Sidebar } from './components/Sidebar'
 import { AuthLockScreen } from './components/AuthLockScreen'
-import { carregarDoSupabase, isSupabaseConfigured, supabase } from './lib/supabase'
+import { carregarDoSupabase, isSupabaseConfigured, supabase, logoutSupabase } from './lib/supabase'
 import { Overview } from './views/Overview'
 import { JobBoard } from './views/JobBoard'
 import { EducationBoard } from './views/EducationBoard'
@@ -87,13 +87,19 @@ export default function App() {
     setAutenticado(true)
   }
 
+  const handleSair = async () => {
+    sessionStorage.removeItem('ep_autenticado')
+    await logoutSupabase()
+    setAutenticado(false)
+  }
+
   if (!autenticado) {
     return <AuthLockScreen onAutenticado={handleAutenticado} />
   }
 
   return (
     <div className="flex h-screen bg-slate-950 text-slate-100 overflow-hidden font-sans">
-      <Sidebar ativa={view} onNav={setView} />
+      <Sidebar ativa={view} onNav={setView} onSair={handleSair} />
       <main className="flex-1 overflow-y-auto bg-slate-950">
         {view === 'overview'  && <Overview itensFinanceiros={itensFinanceiros} documentos={docs} etapasVisto={etapasVisto} prazos={PRAZOS_INICIAIS} />}
         {view === 'kanban'    && <JobBoard vagas={vagas} setVagas={setVagas} />}

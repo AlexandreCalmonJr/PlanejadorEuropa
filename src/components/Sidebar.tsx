@@ -22,7 +22,7 @@ const ITENS_NAV: ItemNav[] = [
   { id: 'voos',       label: 'Voos',         icon: IconeVoo },
 ]
 
-export function Sidebar({ ativa, onNav }: { ativa: View; onNav: (v: View) => void }) {
+export function Sidebar({ ativa, onNav, onSair }: { ativa: View; onNav: (v: View) => void; onSair: () => void }) {
   const [recuada, setRecuada] = useLocalStorage<boolean>('ep_sidebar_recuada', false)
 
   return (
@@ -84,8 +84,8 @@ export function Sidebar({ ativa, onNav }: { ativa: View; onNav: (v: View) => voi
           })}
         </nav>
 
-        {/* Rodape Perfil Usuario */}
-        <div className="p-3 border-t border-slate-800">
+        {/* Rodape Perfil Usuario & Botao Sair */}
+        <div className="p-3 border-t border-slate-800 space-y-2">
           <div className={`flex items-center gap-3 ${recuada ? 'justify-center' : ''}`}>
             <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 shadow-sm" style={{ background: 'linear-gradient(135deg, #14B8A6, #0284C7)' }}>
               <span className="text-white text-xs font-semibold">AC</span>
@@ -97,11 +97,23 @@ export function Sidebar({ ativa, onNav }: { ativa: View; onNav: (v: View) => voi
               </div>
             )}
           </div>
+
+          <button
+            type="button"
+            onClick={onSair}
+            title="Sair da conta / Bloquear painel"
+            className={`w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-semibold text-red-400 hover:bg-red-500/10 border border-red-500/20 hover:border-red-500/30 transition-all ${
+              recuada ? 'px-0' : ''
+            }`}
+          >
+            <span>🚪</span>
+            {!recuada && <span>Sair / Bloquear</span>}
+          </button>
         </div>
       </aside>
 
       {/* Mobile bottom nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 flex">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 flex items-center">
         {ITENS_NAV.map(({ id, label, icon: Icone }) => {
           const ativo = ativa === id
           return (
@@ -117,6 +129,14 @@ export function Sidebar({ ativa, onNav }: { ativa: View; onNav: (v: View) => voi
             </button>
           )
         })}
+        <button
+          onClick={onSair}
+          title="Sair"
+          className="flex-1 flex flex-col items-center gap-0.5 py-2 text-[9px] font-medium text-red-400 hover:text-red-300 transition-colors"
+        >
+          <span className="text-sm">🚪</span>
+          Sair
+        </button>
       </nav>
     </>
   )
