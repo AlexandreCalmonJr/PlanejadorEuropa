@@ -47,10 +47,18 @@ export default function App() {
   // Monitora login/logout via Supabase Auth (ex: Google OAuth)
   useEffect(() => {
     if (!supabase) return
+
+    const limparHashUrl = () => {
+      if (window.location.hash.includes('access_token')) {
+        window.history.replaceState({}, document.title, window.location.pathname)
+      }
+    }
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         setAutenticado(true)
         sessionStorage.setItem('ep_autenticado', 'true')
+        limparHashUrl()
       }
     })
 
@@ -58,6 +66,7 @@ export default function App() {
       if (session?.user) {
         setAutenticado(true)
         sessionStorage.setItem('ep_autenticado', 'true')
+        limparHashUrl()
       }
     })
 
