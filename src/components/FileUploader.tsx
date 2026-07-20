@@ -2,6 +2,7 @@ import { useState, useRef } from 'react'
 import type { AnexoDocumento } from '../types'
 import { gerarId } from '../helpers'
 import { IconeLixeira } from './Icons'
+import { DocumentPreviewModal } from './DocumentPreviewModal'
 
 interface FileUploaderProps {
   anexos?: AnexoDocumento[]
@@ -13,6 +14,7 @@ export function FileUploader({ anexos = [], onAdicionarAnexo, onRemoverAnexo }: 
   const [modoLink, setModoLink] = useState(false)
   const [nomeLink, setNomeLink] = useState('')
   const [urlLink, setUrlLink] = useState('')
+  const [anexoPreview, setAnexoPreview] = useState<AnexoDocumento | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -144,15 +146,22 @@ export function FileUploader({ anexos = [], onAdicionarAnexo, onRemoverAnexo }: 
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setAnexoPreview(anexo)}
+                    className="px-2.5 py-1 rounded bg-teal-500/10 text-teal-400 border border-teal-500/20 hover:bg-teal-500/20 font-semibold transition-all flex items-center gap-1"
+                  >
+                    👁 Prévia
+                  </button>
                   <a
                     href={anexo.url}
                     target="_blank"
                     rel="noreferrer"
                     download={!ehLink ? anexo.nome : undefined}
-                    className="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-teal-400 font-medium transition-all"
+                    className="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition-all"
                   >
-                    {ehLink ? 'Abrir' : 'Baixar/Ver'}
+                    {ehLink ? 'Abrir' : 'Baixar'}
                   </a>
                   <button
                     type="button"
@@ -171,6 +180,12 @@ export function FileUploader({ anexos = [], onAdicionarAnexo, onRemoverAnexo }: 
           Nenhum documento anexado ainda. Faça upload de PDFs/imagens ou insira links.
         </div>
       )}
+
+      {/* Modal de Pre-visualizacao de Documento */}
+      <DocumentPreviewModal
+        anexo={anexoPreview}
+        onFechar={() => setAnexoPreview(null)}
+      />
     </div>
   )
 }

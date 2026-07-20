@@ -1,8 +1,19 @@
-import type { EtapaVisto, StatusEtapa, DocConsulado, TipoVistoId } from '../types'
+import type { EtapaVisto, StatusEtapa, DocConsulado, TipoVistoId, StatusConsularVisto } from '../types'
 import { CONFIGS_VISTO } from '../data'
-import { BadgeEtapa, BadgePais } from '../components/Badges'
+import { BadgeEtapa, BadgePais, BadgeStatusConsular } from '../components/Badges'
 import { InfoCardVisto } from '../components/StatCard'
 import { useLocalStorage } from '../hooks/useLocalStorage'
+
+const STATUS_CONSULARES: StatusConsularVisto[] = [
+  'Documentação Pronta',
+  'Enviado para VFS',
+  'VFS Enviado para Embaixada',
+  'Chegou na Embaixada',
+  'Embaixada Analisando',
+  'Exigência / Correção',
+  'Embaixada Enviando Passaporte',
+  'Visto Concluído',
+]
 
 interface VisaTrackerProps {
   etapas?: EtapaVisto[]
@@ -17,7 +28,30 @@ export function VisaTracker({ setEtapas, setDocsConsulado }: VisaTrackerProps) {
   // Obtem a configuracao do visto atualmente ativo
   const vistoAtivo = CONFIGS_VISTO.find(v => v.id === vistoId) || CONFIGS_VISTO[0]
 
-  // Estado local para etapas e docs de cada visto (armazenado com a chave do visto)
+  // Status consular atual por visto (ex: 'Embaixada Analisando')
+  const [statusConsularPorVisto, setStatusConsularPorVisto] = useLocalStorage<Record<string, StatusConsularVisto>>(
+    'ep_status_consular_por_visto',
+    {
+      'pt-d3': 'VFS Enviado para Embaixada',
+      'pt-d8': 'Documentação Pronta',
+      'pt-procura': 'Documentação Pronta',
+      'pt-d4': 'Enviado para VFS',
+      'es-estudante': 'Documentação Pronta',
+    }
+  )
+
+  // Codigo de protocolo de rastreamento VFS / Consular por visto
+  const [protocolosPorVisto, setProtocolosPorVisto] = useLocalStorage<Record<string, string>>(
+    'ep_protocolos_vfs_por_visto',
+    {
+      'pt-d3': 'BR-SSA-2026-98421-X',
+    }
+  )
+
+  const statusAtual = statusConsularPorVisto[vistoId] || 'Documentação Pronta'
+  const protocoloAtual = protocolosPorVisto[vistoId] || ''
+
+  // Estado local para etapas e docs de cada visto
   const [etapasDoVisto, setEtapasDoVisto] = useLocalStorage<Record<string, EtapaVisto[]>>(
     'ep_etapas_por_visto',
     {
@@ -32,12 +66,19 @@ export function VisaTracker({ setEtapas, setDocsConsulado }: VisaTrackerProps) {
     }
   )
 
-  // Etapas e Docs para o visto selecionado
   const etapasAtuais = etapasDoVisto[vistoId] || vistoAtivo.etapas
   const docsAtuais = docsDoVisto[vistoId] || vistoAtivo.docsConsulado
 
   const concluidas = etapasAtuais.filter(e => e.status === 'Concluído').length
   const pct = etapasAtuais.length > 0 ? concluidas / etapasAtuais.length : 0
+
+  const mudoStatusConsular = (novoStatus: StatusConsularVisto) => {
+    setStatusConsularPorVisto(prev => ({ ...prev, [vistoId]: novoStatus }))
+  }
+
+  const mudoProtocolo = (proto: string) => {
+    setProtocolosPorVisto(prev => ({ ...prev, [vistoId]: proto }))
+  }
 
   const avancarEtapa = (id: string) => {
     const novasEtapas = etapasAtuais.map((e, idx, arr) => {
@@ -66,7 +107,7 @@ export function VisaTracker({ setEtapas, setDocsConsulado }: VisaTrackerProps) {
       {/* Cabecalho */}
       <div>
         <h1 className="text-2xl font-semibold text-slate-100">Planejamento de Visto & Imigração</h1>
-        <p className="text-slate-400 text-sm mt-1">Selecione o tipo de visto desejado para visualizar requisitos, etapas e pasta consular</p>
+        <p className="text-slate-400 text-sm mt-1">Selecione o tipo de visto para acompanhar a tramitação consular VFS e o pipeline de aprovação</p>
       </div>
 
       {/* Seletor de Vistos */}
@@ -95,15 +136,51 @@ export function VisaTracker({ setEtapas, setDocsConsulado }: VisaTrackerProps) {
         })}
       </div>
 
-      {/* Cartao Informativo do Visto Selecionado */}
-      <div className="p-5 bg-slate-900 border border-slate-800 rounded-2xl space-y-4">
-        <div className="flex items-start justify-between gap-4 flex-wrap">
+      {/* Cartao do Visto & Status Consular */}
+      <div className="p-5 bg-slate-900 border border-slate-800 rounded-2xl space-y-5">
+        <div className="flex items-start justify-between gap-4 flex-wrap border-b border-slate-800 pb-4">
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <h2 className="text-lg font-bold text-slate-100">{vistoAtivo.titulo}</h2>
               <BadgePais pais={vistoAtivo.pais} />
+              <BadgeStatusConsular status={statusAtual} />
             </div>
             <p className="text-slate-400 text-xs mt-1 leading-relaxed">{vistoAtivo.descricao}</p>
+          </div>
+
+          {/* Campo de Protocolo VFS */}
+          <div className="flex items-center gap-2 bg-slate-950 p-2 rounded-xl border border-slate-800">
+            <span className="text-xs text-slate-400 font-medium">Protocolo VFS:</span>
+            <input
+              type="text"
+              placeholder="Ex: BR-SSA-2026-XXXXX"
+              value={protocoloAtual}
+              onChange={e => mudoProtocolo(e.target.value)}
+              className="bg-transparent text-xs text-amber-300 font-mono font-bold focus:outline-none w-44"
+            />
+          </div>
+        </div>
+
+        {/* Pipeline de Status Consular Realista */}
+        <div>
+          <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2">
+            Status da Tramitação no Consulado / VFS Global
+          </label>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            {STATUS_CONSULARES.map((s, idx) => (
+              <button
+                key={s}
+                onClick={() => mudoStatusConsular(s)}
+                className={`p-2.5 rounded-xl border text-xs text-left transition-all flex flex-col justify-between ${
+                  statusAtual === s
+                    ? 'bg-amber-500/20 border-amber-500 text-amber-300 font-bold shadow-md'
+                    : 'bg-slate-950/60 border-slate-800/80 text-slate-400 hover:border-slate-700 hover:text-slate-200'
+                }`}
+              >
+                <span className="text-[10px] text-slate-500 font-normal">{idx + 1}. FASE</span>
+                <span className="truncate leading-tight mt-0.5">{s}</span>
+              </button>
+            ))}
           </div>
         </div>
 

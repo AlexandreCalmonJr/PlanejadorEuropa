@@ -9,7 +9,29 @@ export interface AnexoDocumento {
 }
 
 // ─── Views ────────────────────────────────────────────────────────────────────
-export type View = 'overview' | 'kanban' | 'documents' | 'finance' | 'visto' | 'educacao' | 'logistica'
+export type View = 'overview' | 'kanban' | 'documents' | 'finance' | 'visto' | 'educacao' | 'logistica' | 'voos'
+
+// ─── Voos & Passagens Aereas ──────────────────────────────────────────────────
+export interface Voo {
+  id: string
+  ciaAerea: string
+  origem: string
+  destino: string
+  dataPartida: string
+  horaPartida?: string
+  dataChegada?: string
+  horaChegada?: string
+  tipoVoo: 'Somente Ida' | 'Ida e Volta'
+  conexoes: 'Direto' | '1 Parada' | '2+ Paradas'
+  cidadesConexao?: string
+  valorBRL: number
+  valorEUR: number
+  bagagemMao: boolean
+  bagagensDespachadas: number
+  codigoReserva?: string
+  observacoes?: string
+  anexos?: AnexoDocumento[]
+}
 
 // ─── Kanban de Vagas ──────────────────────────────────────────────────────────
 export type ColunaKanban = 'Candidatado' | 'Triagem RH' | 'Entrevista Técnica' | 'Oferta'
@@ -92,6 +114,16 @@ export interface ItemFinanceiro {
 
 // ─── Visto & Múltiplos Vistos ───────────────────────────────────────────
 export type StatusEtapa = 'Concluído' | 'Em Andamento' | 'Pendente'
+
+export type StatusConsularVisto =
+  | 'Documentação Pronta'
+  | 'Enviado para VFS'
+  | 'VFS Enviado para Embaixada'
+  | 'Chegou na Embaixada'
+  | 'Embaixada Analisando'
+  | 'Exigência / Correção'
+  | 'Embaixada Enviando Passaporte'
+  | 'Visto Concluído'
 
 export interface EtapaVisto {
   id: string

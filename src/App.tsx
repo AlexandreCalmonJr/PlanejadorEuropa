@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import type { View, Vaga, Faculdade, Documento, ItemFinanceiro, EtapaVisto, DocConsulado, TarefaLogistica } from './types'
+import type { View, Vaga, Faculdade, Documento, ItemFinanceiro, EtapaVisto, DocConsulado, TarefaLogistica, Voo } from './types'
 import { useLocalStorage } from './hooks/useLocalStorage'
 import {
   VAGAS_INICIAIS,
@@ -22,6 +22,7 @@ import { BureaucracyTracker } from './views/BureaucracyTracker'
 import { FinanceManager } from './views/FinanceManager'
 import { VisaTracker } from './views/VisaTracker'
 import { LogisticsTracker } from './views/LogisticsTracker'
+import { FlightPlanner } from './views/FlightPlanner'
 
 export default function App() {
   const [autenticado, setAutenticado] = useState<boolean>(() => {
@@ -37,6 +38,7 @@ export default function App() {
   const [etapasVisto, setEtapasVisto] = useLocalStorage<EtapaVisto[]>('ep_etapas_visto', ETAPAS_VISTO_INICIAIS)
   const [docsConsulado, setDocsConsulado] = useLocalStorage<DocConsulado[]>('ep_docs_consulado', DOCS_CONSULADO_INICIAIS)
   const [tarefasLogistica, setTarefasLogistica] = useLocalStorage<TarefaLogistica[]>('ep_logistica', TAREFAS_LOGISTICA_INICIAIS)
+  const [voos, setVoos] = useLocalStorage<Voo[]>('ep_voos', [])
 
   // Carrega dados do Supabase se configurado
   useEffect(() => {
@@ -53,6 +55,9 @@ export default function App() {
 
       const fin = await carregarDoSupabase<ItemFinanceiro>('itens_financeiros')
       if (fin && fin.length > 0) setItensFinanceiros(fin)
+
+      const voosData = await carregarDoSupabase<Voo>('voos')
+      if (voosData && voosData.length > 0) setVoos(voosData)
     }
     carregarSupabase()
   }, [])
@@ -77,6 +82,7 @@ export default function App() {
         {view === 'finance'   && <FinanceManager itens={itensFinanceiros} setItens={setItensFinanceiros} />}
         {view === 'visto'     && <VisaTracker etapas={etapasVisto} setEtapas={setEtapasVisto} docsConsulado={docsConsulado} setDocsConsulado={setDocsConsulado} />}
         {view === 'logistica' && <LogisticsTracker tarefas={tarefasLogistica} setTarefas={setTarefasLogistica} />}
+        {view === 'voos'      && <FlightPlanner voos={voos} setVoos={setVoos} />}
       </main>
     </div>
   )

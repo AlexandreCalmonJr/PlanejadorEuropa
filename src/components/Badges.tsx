@@ -42,3 +42,25 @@ export function BadgePais({ pais }: { pais: 'PT' | 'ES' }) {
     </span>
   )
 }
+
+export function BadgeStatusConsular({ status }: { status: string }) {
+  const cores: Record<string, { bg: string; txt: string }> = {
+    'Documentação Pronta': { bg: 'bg-sky-500/10 border-sky-500/20', txt: 'text-sky-400' },
+    'Enviado para VFS': { bg: 'bg-violet-500/10 border-violet-500/20', txt: 'text-violet-400' },
+    'VFS Enviado para Embaixada': { bg: 'bg-indigo-500/10 border-indigo-500/20', txt: 'text-indigo-400' },
+    'Chegou na Embaixada': { bg: 'bg-blue-500/10 border-blue-500/20', txt: 'text-blue-400' },
+    'Embaixada Analisando': { bg: 'bg-amber-500/10 border-amber-500/20', txt: 'text-amber-400' },
+    'Exigência / Correção': { bg: 'bg-red-500/10 border-red-500/20', txt: 'text-red-400' },
+    'Embaixada Enviando Passaporte': { bg: 'bg-teal-500/10 border-teal-500/20', txt: 'text-teal-400' },
+    'Visto Concluído': { bg: 'bg-emerald-500/10 border-emerald-500/20', txt: 'text-emerald-400' },
+  }
+
+  const c = cores[status] || { bg: 'bg-slate-800 border-slate-700', txt: 'text-slate-300' }
+
+  return (
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${c.bg} ${c.txt}`}>
+      <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
+      {status}
+    </span>
+  )
+}

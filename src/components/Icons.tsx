@@ -32,7 +32,15 @@ export function IconeArquivo({ size, ativo }: { size: number; ativo: boolean }) 
     </svg>
   )
 }
-
+export function IconeVoo({ size, ativo }: { size: number; ativo: boolean }) {
+  const c = ativo ? '#14B8A6' : 'currentColor'
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M22 2L11 13" />
+      <path d="M22 2L15 22L11 13L2 9L22 2Z" fill={c} fillOpacity={ativo ? 0.2 : 0.1} />
+    </svg>
+  )
+}
 export function IconeCarteira({ size, ativo }: { size: number; ativo: boolean }) {
   const c = ativo ? '#14B8A6' : 'currentColor'
   const op = ativo ? 1 : 0.6

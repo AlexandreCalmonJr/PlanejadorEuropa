@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import type { View } from '../types'
-import { IconeGrade, IconeKanban, IconeArquivo, IconeCarteira, IconePassaporte, IconeGraduacao, IconeLogistica } from './Icons'
+import { IconeGrade, IconeKanban, IconeArquivo, IconeCarteira, IconePassaporte, IconeGraduacao, IconeLogistica, IconeVoo } from './Icons'
 import { useLocalStorage } from '../hooks/useLocalStorage'
 
 interface ItemNav {
@@ -19,6 +19,7 @@ const ITENS_NAV: ItemNav[] = [
   { id: 'finance',    label: 'Finanças',     icon: IconeCarteira },
   { id: 'visto',      label: 'Visto',        icon: IconePassaporte, badge: '!', badgeColor: 'bg-amber-500/20 text-amber-400' },
   { id: 'logistica',  label: 'Logística',    icon: IconeLogistica },
+  { id: 'voos',       label: 'Voos',         icon: IconeVoo },
 ]
 
 export function Sidebar({ ativa, onNav }: { ativa: View; onNav: (v: View) => void }) {
