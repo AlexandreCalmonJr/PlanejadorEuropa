@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react'
 import type { View } from '../types'
-import { IconeGrade, IconeKanban, IconeArquivo, IconeCarteira, IconePassaporte, IconeGraduacao, IconeLogistica, IconeVoo, IconeDemo } from './Icons'
+import { IconeGrade, IconeKanban, IconeArquivo, IconeCarteira, IconePassaporte, IconeGraduacao, IconeLogistica, IconeVoo, IconeDemo, IconeTutorial } from './Icons'
 import { useLocalStorage } from '../hooks/useLocalStorage'
 
 interface ItemNav {
@@ -21,6 +21,7 @@ const ITENS_NAV: ItemNav[] = [
   { id: 'logistica',  label: 'Logística',    icon: IconeLogistica },
   { id: 'voos',       label: 'Voos',         icon: IconeVoo },
   { id: 'demo',       label: 'Modo Demo',    icon: IconeDemo },
+  { id: 'tutorial',   label: 'Tutorial',     icon: IconeTutorial },
 ]
 
 // Abas de acesso rapido para a barra inferior no mobile

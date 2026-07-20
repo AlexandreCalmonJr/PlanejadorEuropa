@@ -24,6 +24,7 @@ import { VisaTracker } from './views/VisaTracker'
 import { LogisticsTracker } from './views/LogisticsTracker'
 import { FlightPlanner } from './views/FlightPlanner'
 import { DemoSeeder } from './views/DemoSeeder'
+import { Tutorial } from './views/Tutorial'
 
 export default function App() {
   const [autenticado, setAutenticado] = useState<boolean>(() => {
@@ -151,6 +152,7 @@ export default function App() {
             onNavegarResumo={() => setView('overview')}
           />
         )}
+        {view === 'tutorial' && <Tutorial />}
       </main>
     </div>
   )
