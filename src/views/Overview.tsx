@@ -1,5 +1,5 @@
 import { fmt } from '../helpers'
-import type { ItemFinanceiro, Documento, EtapaVisto, Prazo } from '../types'
+import type { ItemFinanceiro, Documento, EtapaVisto, Prazo, Vaga, Faculdade, TarefaLogistica, Voo } from '../types'
 import { ProgressRing } from '../components/ProgressRing'
 import { CardEstatistica, BarraOrcamento, PontoLegenda } from '../components/StatCard'
 
@@ -8,9 +8,22 @@ interface OverviewProps {
   documentos: Documento[]
   etapasVisto: EtapaVisto[]
   prazos: Prazo[]
+  vagas?: Vaga[]
+  faculdades?: Faculdade[]
+  tarefasLogistica?: TarefaLogistica[]
+  voos?: Voo[]
 }
 
-export function Overview({ itensFinanceiros, documentos, etapasVisto, prazos }: OverviewProps) {
+export function Overview({
+  itensFinanceiros,
+  documentos,
+  etapasVisto,
+  prazos,
+  vagas = [],
+  faculdades = [],
+  tarefasLogistica = [],
+  voos = [],
+}: OverviewProps) {
   const totalBRL = itensFinanceiros.filter(i => i.tipo === 'receita').reduce((s, i) => s + i.valorBRL, 0)
   const totalEUR = itensFinanceiros.filter(i => i.tipo === 'receita').reduce((s, i) => s + i.valorEUR, 0)
   const despBRL  = itensFinanceiros.filter(i => i.tipo === 'despesa').reduce((s, i) => s + i.valorBRL, 0)
@@ -34,23 +47,72 @@ export function Overview({ itensFinanceiros, documentos, etapasVisto, prazos }: 
 
   const receitas = itensFinanceiros.filter(i => i.tipo === 'receita')
 
+  // Metricas dos outros modulos
+  const vagasCandidatadas = vagas.length
+  const vagasEntrevista = vagas.filter(v => v.coluna === 'Entrevista Técnica' || v.coluna === 'Oferta').length
+  const facsCadastradas = faculdades.length
+  const facsAceitas = faculdades.filter(f => f.coluna === 'Aceito').length
+  const logisticaConcluida = tarefasLogistica.filter(t => t.status === 'Concluído').length
+  const totalLogistica = tarefasLogistica.length
+
   return (
-    <div className="p-6 md:p-8 w-full pb-24 md:pb-8">
-      <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-slate-100">Visão Geral</h1>
+    <div className="p-6 md:p-8 w-full pb-24 md:pb-8 space-y-6">
+      <div>
+        <h1 className="text-2xl font-semibold text-slate-100">Visão Geral & Painel de Controle</h1>
         <p className="text-slate-400 text-sm mt-1">Sua jornada de imigração · Alexandre & Andressa · Salvador → Coimbra</p>
       </div>
 
-      {/* Cards de estatísticas */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      {/* Cards de estatísticas financeiras */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <CardEstatistica label="Total em Caixa" valor={fmt(totalBRL, 'BRL')} sub="orçamento disponível" cor="#14B8A6" />
         <CardEstatistica label="Convertido em EUR" valor={fmt(totalEUR, 'EUR')} sub="a R$6,15/€1" cor="#0284C7" />
         <CardEstatistica label="Despesas Previstas" valor={fmt(despEUR, 'EUR')} sub={fmt(despBRL, 'BRL')} cor="#8B5CF6" />
         <CardEstatistica label="Saldo Após Mudança" valor={fmt(saldoEUR, 'EUR')} sub="estimativa de reserva" cor="#10B981" />
       </div>
 
+      {/* Widgets dos Modulos (Vagas, Faculdades, Voos, Logistica) */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-400 uppercase">💼 Vagas TI</span>
+            <span className="text-xs px-2 py-0.5 rounded bg-teal-500/10 text-teal-400 font-bold">{vagasEntrevista} entrevistas</span>
+          </div>
+          <p className="text-2xl font-extrabold text-slate-100 mt-2">{vagasCandidatadas}</p>
+          <p className="text-xs text-slate-500 mt-0.5">vagas acompanhadas</p>
+        </div>
+
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-400 uppercase">🎓 Universidades</span>
+            <span className="text-xs px-2 py-0.5 rounded bg-violet-500/10 text-violet-400 font-bold">{facsAceitas} aceitas</span>
+          </div>
+          <p className="text-2xl font-extrabold text-slate-100 mt-2">{facsCadastradas}</p>
+          <p className="text-xs text-slate-500 mt-0.5">opções em pesquisa</p>
+        </div>
+
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-400 uppercase">✈ Passagens</span>
+            <span className="text-xs px-2 py-0.5 rounded bg-sky-500/10 text-sky-400 font-bold">{voos.length} cotações</span>
+          </div>
+          <p className="text-2xl font-extrabold text-slate-100 mt-2">{voos.length > 0 ? voos[0].dataPartida : 'Out 2026'}</p>
+          <p className="text-xs text-slate-500 mt-0.5">data de embarque</p>
+        </div>
+
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-400 uppercase">📋 Logística</span>
+            <span className="text-xs px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-bold">
+              {totalLogistica > 0 ? Math.round((logisticaConcluida / totalLogistica) * 100) : 0}%
+            </span>
+          </div>
+          <p className="text-2xl font-extrabold text-slate-100 mt-2">{logisticaConcluida}<span className="text-slate-600 text-sm">/{totalLogistica}</span></p>
+          <p className="text-xs text-slate-500 mt-0.5">tarefas de chegada OK</p>
+        </div>
+      </div>
+
       {/* Linha principal */}
-      <div className="grid md:grid-cols-3 gap-4 mb-4">
+      <div className="grid md:grid-cols-3 gap-4">
         {/* Orçamento */}
         <div className="md:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-6">
           <h2 className="text-xs font-semibold text-slate-400 mb-4 uppercase tracking-widest">Composição do Orçamento</h2>
