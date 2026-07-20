@@ -50,7 +50,7 @@ export function FinanceManager({ itens, setItens }: FinanceManagerProps) {
   const remover = (id: string) => setItens(prev => prev.filter(i => i.id !== id))
 
   return (
-    <div className="p-6 md:p-8 pb-24 md:pb-8 max-w-4xl mx-auto">
+    <div className="p-6 md:p-8 pb-24 md:pb-8 w-full">
       <div className="mb-8 flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-2xl font-semibold text-slate-100">Gerenciador Financeiro</h1>

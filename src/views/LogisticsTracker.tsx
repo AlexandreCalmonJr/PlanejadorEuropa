@@ -55,7 +55,7 @@ export function LogisticsTracker({ tarefas, setTarefas }: LogisticsTrackerProps)
   const tarefasAmbos = tarefas.filter(t => t.responsavel === 'AMBOS')
 
   return (
-    <div className="p-6 md:p-8 pb-24 md:pb-8 max-w-3xl mx-auto">
+    <div className="p-6 md:p-8 pb-24 md:pb-8 w-full">
       <div className="mb-6 flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-2xl font-semibold text-slate-100">Logística de Chegada</h1>

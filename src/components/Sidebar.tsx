@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import type { View } from '../types'
 import { IconeGrade, IconeKanban, IconeArquivo, IconeCarteira, IconePassaporte, IconeGraduacao, IconeLogistica } from './Icons'
+import { useLocalStorage } from '../hooks/useLocalStorage'
 
 interface ItemNav {
   id: View
@@ -21,54 +22,79 @@ const ITENS_NAV: ItemNav[] = [
 ]
 
 export function Sidebar({ ativa, onNav }: { ativa: View; onNav: (v: View) => void }) {
+  const [recuada, setRecuada] = useLocalStorage<boolean>('ep_sidebar_recuada', false)
+
   return (
     <>
-      {/* Desktop */}
-      <aside className="hidden md:flex flex-col w-60 shrink-0 bg-slate-900 border-r border-slate-800 h-screen sticky top-0">
-        <div className="px-5 py-6 border-b border-slate-800">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg, #14B8A6, #0284C7)' }}>
-              <span className="text-white font-bold text-sm">EP</span>
+      {/* Desktop Sidebar */}
+      <aside className={`hidden md:flex flex-col shrink-0 bg-slate-900 border-r border-slate-800 h-screen sticky top-0 transition-all duration-300 ${recuada ? 'w-16' : 'w-60'}`}>
+        {/* Header com Botao de Recuar */}
+        <div className="px-3 py-4 border-b border-slate-800 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 shadow-sm" style={{ background: 'linear-gradient(135deg, #14B8A6, #0284C7)' }}>
+              <span className="text-white font-bold text-xs">EP</span>
             </div>
-            <div>
-              <p className="text-slate-100 font-semibold text-sm leading-none">EuroPlanner</p>
-              <p className="text-slate-500 text-xs mt-0.5">Salvador → Coimbra</p>
-            </div>
+            {!recuada && (
+              <div className="min-w-0 flex-1">
+                <p className="text-slate-100 font-bold text-sm leading-none truncate">EuroPlanner</p>
+                <p className="text-slate-500 text-[11px] mt-0.5 truncate">Salvador → Coimbra</p>
+              </div>
+            )}
           </div>
+
+          <button
+            type="button"
+            onClick={() => setRecuada(!recuada)}
+            title={recuada ? 'Expandir menu' : 'Recuar menu'}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-100 hover:bg-slate-800 transition-all text-xs flex items-center justify-center shrink-0"
+          >
+            {recuada ? '❯' : '❮'}
+          </button>
         </div>
 
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        {/* Links de Navegacao */}
+        <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
           {ITENS_NAV.map(({ id, label, icon: Icone, badge, badgeColor }) => {
             const ativo = ativa === id
             return (
               <button
                 key={id}
                 onClick={() => onNav(id as View)}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 ${
-                  ativo ? 'bg-teal-500/10 text-teal-400' : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800'
+                title={recuada ? label : undefined}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 ${
+                  recuada ? 'justify-center px-0' : ''
+                } ${
+                  ativo ? 'bg-teal-500/10 text-teal-400 font-bold' : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/60'
                 }`}
               >
-                <Icone size={16} ativo={ativo} />
-                {label}
-                {badge && (
-                  <span className={`ml-auto text-xs px-1.5 py-0.5 rounded-md ${badgeColor ?? 'bg-slate-700 text-slate-300'}`}>
-                    {badge}
-                  </span>
+                <Icone size={18} ativo={ativo} />
+                {!recuada && (
+                  <>
+                    <span className="truncate">{label}</span>
+                    {badge && (
+                      <span className={`ml-auto text-xs px-1.5 py-0.5 rounded-md ${badgeColor ?? 'bg-slate-700 text-slate-300'}`}>
+                        {badge}
+                      </span>
+                    )}
+                  </>
                 )}
               </button>
             )
           })}
         </nav>
 
-        <div className="px-4 py-4 border-t border-slate-800">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg, #14B8A6, #0284C7)' }}>
+        {/* Rodape Perfil Usuario */}
+        <div className="p-3 border-t border-slate-800">
+          <div className={`flex items-center gap-3 ${recuada ? 'justify-center' : ''}`}>
+            <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 shadow-sm" style={{ background: 'linear-gradient(135deg, #14B8A6, #0284C7)' }}>
               <span className="text-white text-xs font-semibold">AC</span>
             </div>
-            <div className="min-w-0">
-              <p className="text-slate-200 text-xs font-medium truncate">Alexandre Calmon Jr.</p>
-              <p className="text-slate-500 text-xs truncate">Salvador → Coimbra</p>
-            </div>
+            {!recuada && (
+              <div className="min-w-0 flex-1">
+                <p className="text-slate-200 text-xs font-semibold truncate">Alexandre Calmon</p>
+                <p className="text-slate-500 text-[11px] truncate">Salvador → Coimbra</p>
+              </div>
+            )}
           </div>
         </div>
       </aside>

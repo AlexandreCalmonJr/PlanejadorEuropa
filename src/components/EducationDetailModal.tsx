@@ -1,0 +1,241 @@
+import { useState, useEffect } from 'react'
+import type { Faculdade, AnexoDocumento } from '../types'
+import { COTACAO_EURO } from '../helpers'
+import { COLUNAS_FACULDADE, CORES_COLUNAS_FACULDADE } from '../data'
+import { Modal } from './Modal'
+import { FileUploader } from './FileUploader'
+import { BadgePais } from './Badges'
+import { IconeLixeira } from './Icons'
+
+interface EducationDetailModalProps {
+  faculdade: Faculdade | null
+  onFechar: () => void
+  onSalvar: (faculdadeAtualizada: Faculdade) => void
+  onRemover: (id: string) => void
+}
+
+export function EducationDetailModal({ faculdade, onFechar, onSalvar, onRemover }: EducationDetailModalProps) {
+  const [formData, setFormData] = useState<Faculdade | null>(faculdade)
+
+  useEffect(() => {
+    setFormData(faculdade)
+  }, [faculdade])
+
+  if (!faculdade || !formData) return null
+
+  const handleSalvar = () => {
+    if (formData) {
+      onSalvar(formData)
+    }
+  }
+
+  const handleAdicionarAnexo = (anexo: AnexoDocumento) => {
+    const novosAnexos = [...(formData.anexos || []), anexo]
+    const atualizado = { ...formData, anexos: novosAnexos }
+    setFormData(atualizado)
+    onSalvar(atualizado)
+  }
+
+  const handleRemoverAnexo = (id: string) => {
+    const novosAnexos = (formData.anexos || []).filter(a => a.id !== id)
+    const atualizado = { ...formData, anexos: novosAnexos }
+    setFormData(atualizado)
+    onSalvar(atualizado)
+  }
+
+  const propinaBrl = Math.round(formData.propinaAnualEur * COTACAO_EURO)
+  const parcelaMensalEur = formData.parcelamento
+    ? Math.round(formData.propinaAnualEur / formData.parcelamento)
+    : null
+  const parcelaMensalBrl = parcelaMensalEur ? Math.round(parcelaMensalEur * COTACAO_EURO) : null
+
+  return (
+    <Modal aberto={Boolean(faculdade)} onFechar={onFechar} titulo="Detalhes da Universidade">
+      <div className="space-y-6 text-slate-100">
+        {/* Cabecalho Principal */}
+        <div className="flex items-start justify-between gap-4 border-b border-slate-800 pb-4">
+          <div className="flex items-center gap-3">
+            <div
+              className="w-12 h-12 rounded-xl flex items-center justify-center text-white text-lg font-bold shrink-0 shadow-lg"
+              style={{ background: formData.cor }}
+            >
+              🎓
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-xl font-bold text-slate-100 leading-tight">{formData.instituicao}</h2>
+                <BadgePais pais={formData.pais} />
+              </div>
+              <p className="text-sm text-violet-400 font-medium">{formData.curso}</p>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-xs text-slate-400">📍 {formData.cidade}, {formData.pais}</span>
+                <span className="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
+                  {formData.tipoCurso}
+                </span>
+                <span className="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-400">
+                  {formData.area}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <span
+            className="text-xs font-semibold px-2.5 py-1 rounded-full text-white shadow-sm shrink-0"
+            style={{ background: CORES_COLUNAS_FACULDADE[formData.coluna] }}
+          >
+            {formData.coluna}
+          </span>
+        </div>
+
+        {/* Quadro de Custos & Propinas */}
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 p-4 bg-slate-900/90 border border-slate-800 rounded-2xl">
+          <div>
+            <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Propina Anual</p>
+            <p className="text-base font-extrabold text-slate-100 mt-0.5">
+              €{formData.propinaAnualEur.toLocaleString()}{' '}
+              <span className="text-xs text-slate-400 font-normal">/ano</span>
+            </p>
+            <p className="text-[11px] text-slate-400 mt-0.5">~R$ {propinaBrl.toLocaleString('pt-BR')}</p>
+          </div>
+
+          {parcelaMensalEur ? (
+            <div>
+              <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                Parcelamento ({formData.parcelamento}x)
+              </p>
+              <p className="text-base font-extrabold text-violet-400 mt-0.5">
+                €{parcelaMensalEur}{' '}
+                <span className="text-xs text-slate-400 font-normal">/mês</span>
+              </p>
+              <p className="text-[11px] text-slate-400 mt-0.5">~R$ {parcelaMensalBrl?.toLocaleString('pt-BR')}</p>
+            </div>
+          ) : (
+            <div>
+              <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Matrícula / Taxas</p>
+              <p className="text-base font-extrabold text-slate-200 mt-0.5">
+                €{formData.taxaCandidaturaEur + formData.matriculaEur}
+              </p>
+            </div>
+          )}
+
+          <div>
+            <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Taxas Iniciais</p>
+            <p className="text-xs text-slate-300 mt-1">
+              Candidatura: <span className="font-semibold text-slate-100">€{formData.taxaCandidaturaEur}</span>
+            </p>
+            <p className="text-xs text-slate-300">
+              Matrícula: <span className="font-semibold text-slate-100">€{formData.matriculaEur}</span>
+            </p>
+          </div>
+        </div>
+
+        {/* Requisitos & Vantagens */}
+        <div>
+          <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider block mb-2">
+            Critérios de Admissão & Facilidades
+          </label>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+            <div className={`p-3 rounded-xl border text-xs flex flex-col justify-between ${
+              formData.aceitaEnem
+                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
+                : 'bg-slate-900 border-slate-800 text-slate-500'
+            }`}>
+              <span className="font-bold">ACEITA ENEM?</span>
+              <span className="mt-1 font-semibold">{formData.aceitaEnem ? '✓ SIM (Nota do ENEM)' : '✕ Não aceita ENEM'}</span>
+            </div>
+
+            <div className={`p-3 rounded-xl border text-xs flex flex-col justify-between ${
+              formData.aceitaDiplomaBr
+                ? 'bg-sky-500/10 border-sky-500/30 text-sky-300'
+                : 'bg-slate-900 border-slate-800 text-slate-500'
+            }`}>
+              <span className="font-bold">DIPLOMA BRASILEIRO?</span>
+              <span className="mt-1 font-semibold">{formData.aceitaDiplomaBr ? '✓ Aceita Graduação BR' : '✕ Requer Equivalência'}</span>
+            </div>
+
+            <div className={`p-3 rounded-xl border text-xs flex flex-col justify-between ${
+              formData.bolsaCplp
+                ? 'bg-violet-500/10 border-violet-500/30 text-violet-300'
+                : 'bg-slate-900 border-slate-800 text-slate-500'
+            }`}>
+              <span className="font-bold">DESCONTO CPLP?</span>
+              <span className="mt-1 font-semibold">{formData.bolsaCplp ? '✓ Tarifa Reduzida CPLP' : '✕ Sem Desconto CPLP'}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Mudar Status no Kanban */}
+        <div>
+          <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider block mb-2">
+            Status no Processo Seletivo
+          </label>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            {COLUNAS_FACULDADE.map(col => (
+              <button
+                key={col}
+                type="button"
+                onClick={() => {
+                  const atualizado = { ...formData, coluna: col }
+                  setFormData(atualizado)
+                  onSalvar(atualizado)
+                }}
+                className={`px-3 py-2 rounded-xl text-xs font-medium border transition-all text-center ${
+                  formData.coluna === col
+                    ? 'bg-violet-500/20 border-violet-500 text-violet-300 font-bold'
+                    : 'bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200'
+                }`}
+              >
+                {col}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Observacoes e Homologacao */}
+        <div className="space-y-3">
+          <div>
+            <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider block mb-1">
+              Observações & Dicas de Homologação (ex: UNEDasiss / Equivalência)
+            </label>
+            <textarea
+              rows={3}
+              placeholder="Digite prazos de inscrição, exigências de notas ou contatos acadêmicos..."
+              value={formData.observacao || ''}
+              onChange={e => setFormData({ ...formData, observacao: e.target.value })}
+              onBlur={handleSalvar}
+              className="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 focus:outline-none focus:border-violet-500 resize-none leading-relaxed"
+            />
+          </div>
+        </div>
+
+        {/* Componente de Anexos */}
+        <FileUploader
+          anexos={formData.anexos}
+          onAdicionarAnexo={handleAdicionarAnexo}
+          onRemoverAnexo={handleRemoverAnexo}
+        />
+
+        {/* Rodape */}
+        <div className="pt-2 border-t border-slate-800 flex justify-between items-center">
+          <button
+            type="button"
+            onClick={() => {
+              onRemover(formData.id)
+              onFechar()
+            }}
+            className="flex items-center gap-1.5 text-xs text-red-400 hover:text-red-300 font-medium px-3 py-1.5 rounded-lg hover:bg-red-500/10 transition-all"
+          >
+            <IconeLixeira /> Excluir Faculdade
+          </button>
+          <button
+            type="button"
+            onClick={onFechar}
+            className="px-4 py-2 bg-violet-500 text-white font-bold text-xs rounded-xl hover:bg-violet-400 transition-all"
+          >
+            Concluído
+          </button>
+        </div>
+      </div>
+    </Modal>
+  )
+}

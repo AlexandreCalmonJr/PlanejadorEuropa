@@ -1,3 +1,13 @@
+// ─── Anexos de Documentos ──────────────────────────────────────────────────
+export interface AnexoDocumento {
+  id: string
+  nome: string
+  tamanho?: string
+  tipo?: string
+  url: string
+  dataUpload: string
+}
+
 // ─── Views ────────────────────────────────────────────────────────────────────
 export type View = 'overview' | 'kanban' | 'documents' | 'finance' | 'visto' | 'educacao' | 'logistica'
 
@@ -17,6 +27,12 @@ export interface Vaga {
   cidade?: string
   modelo?: string
   stack?: string[]
+  descricao?: string
+  requisitos?: string
+  linkVaga?: string
+  contato?: string
+  observacoes?: string
+  anexos?: AnexoDocumento[]
 }
 
 // ─── Kanban de Faculdades ─────────────────────────────────────────────────────
@@ -42,6 +58,10 @@ export interface Faculdade {
   coluna: ColunaFaculdade
   cor: string
   observacao?: string
+  requisitosEntrada?: string
+  prazoInscricao?: string
+  linkSite?: string
+  anexos?: AnexoDocumento[]
 }
 
 // ─── Documentos ───────────────────────────────────────────────────────────────
@@ -54,6 +74,8 @@ export interface Documento {
   status: StatusDoc
   bloqueadoPor?: string[]
   pais?: PaisDestino | 'AMBOS'
+  observacoes?: string
+  anexos?: AnexoDocumento[]
 }
 
 // ─── Finanças ─────────────────────────────────────────────────────────────────
@@ -68,7 +90,7 @@ export interface ItemFinanceiro {
   recorrente?: boolean
 }
 
-// ─── Visto ────────────────────────────────────────────────────────────────────
+// ─── Visto & Múltiplos Vistos ───────────────────────────────────────────
 export type StatusEtapa = 'Concluído' | 'Em Andamento' | 'Pendente'
 
 export interface EtapaVisto {
@@ -83,6 +105,22 @@ export interface EtapaVisto {
 export interface DocConsulado {
   label: string
   ok: boolean
+}
+
+export type TipoVistoId = 'pt-d3' | 'pt-d8' | 'pt-procura' | 'pt-d4' | 'es-estudante'
+
+export interface ConfigVisto {
+  id: TipoVistoId
+  titulo: string
+  codigo: string
+  pais: PaisDestino
+  descricao: string
+  consulado: string
+  agendamentoEstimado: string
+  prazoEstimado: string
+  requisitosChave: string[]
+  docsConsulado: DocConsulado[]
+  etapas: EtapaVisto[]
 }
 
 // ─── Logística ────────────────────────────────────────────────────────────────

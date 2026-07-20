@@ -5,6 +5,7 @@ import { COLUNAS_FACULDADE, CORES_COLUNAS_FACULDADE } from '../data'
 import { IconeMais, IconeLixeira } from '../components/Icons'
 import { BadgePais } from '../components/Badges'
 import { Modal, CampoTexto, CampoNumero, CampoSelect, CampoToggle, BotaoSubmit, useModal } from '../components/Modal'
+import { EducationDetailModal } from '../components/EducationDetailModal'
 
 interface EducationBoardProps {
   faculdades: Faculdade[]
@@ -17,7 +18,8 @@ export function EducationBoard({ faculdades, setFaculdades }: EducationBoardProp
   const [arrastando, setArrastando] = useState<string | null>(null)
   const sobreRef = useRef<ColunaFaculdade | null>(null)
   const [filtroPais, setFiltroPais] = useState<PaisDestino | 'TODOS'>('TODOS')
-  const modal = useModal()
+  const modalNovo = useModal()
+  const [faculdadeSelecionada, setFaculdadeSelecionada] = useState<Faculdade | null>(null)
 
   // Form state
   const [novaInstituicao, setNovaInstituicao] = useState('')
@@ -62,13 +64,24 @@ export function EducationBoard({ faculdades, setFaculdades }: EducationBoardProp
       bolsaCplp: novoPais === 'PT',
       coluna: 'Pesquisando',
       cor,
+      anexos: [],
     }
     setFaculdades(prev => [...prev, nova])
     setNovaInstituicao(''); setNovoCurso(''); setNovaCidade('')
-    modal.fechar()
+    modalNovo.fechar()
   }
 
-  const remover = (id: string) => setFaculdades(prev => prev.filter(f => f.id !== id))
+  const salvarFaculdade = (facAtualizada: Faculdade) => {
+    setFaculdades(prev => prev.map(f => f.id === facAtualizada.id ? facAtualizada : f))
+    if (faculdadeSelecionada?.id === facAtualizada.id) {
+      setFaculdadeSelecionada(facAtualizada)
+    }
+  }
+
+  const remover = (id: string) => {
+    setFaculdades(prev => prev.filter(f => f.id !== id))
+    if (faculdadeSelecionada?.id === id) setFaculdadeSelecionada(null)
+  }
 
   const totalPT = faculdades.filter(f => f.pais === 'PT').length
   const totalES = faculdades.filter(f => f.pais === 'ES').length
@@ -79,11 +92,11 @@ export function EducationBoard({ faculdades, setFaculdades }: EducationBoardProp
         <div>
           <h1 className="text-2xl font-semibold text-slate-100">Faculdades</h1>
           <p className="text-slate-400 text-sm mt-1">
-            Kanban de candidaturas universitárias · {totalPT} em Portugal · {totalES} na Espanha
+            Kanban de candidaturas universitárias · Clique para ver detalhes completos e anexos
           </p>
         </div>
         <button
-          onClick={modal.abrir}
+          onClick={modalNovo.abrir}
           className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-violet-400 bg-violet-500/10 border border-violet-500/20 hover:bg-violet-500/20 transition-all"
         >
           <IconeMais /> Nova Faculdade
@@ -98,19 +111,19 @@ export function EducationBoard({ faculdades, setFaculdades }: EducationBoardProp
             onClick={() => setFiltroPais(p)}
             className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 ${
               filtroPais === p
-                ? 'bg-slate-700 text-slate-100 shadow-sm'
-                : 'text-slate-500 hover:text-slate-300 bg-slate-800/50'
+                ? 'bg-violet-500 text-white shadow-sm'
+                : 'bg-slate-900 text-slate-400 border border-slate-800 hover:text-slate-200'
             }`}
           >
-            {p === 'TODOS' ? '🌍 Todos' : p === 'PT' ? '🇵🇹 Portugal' : '🇪🇸 Espanha'}
+            {p === 'TODOS' ? '🌐 Todos' : p === 'PT' ? `🇵🇹 Portugal (${totalPT})` : `🇪🇸 Espanha (${totalES})`}
           </button>
         ))}
       </div>
 
       {/* Kanban */}
-      <div className="flex gap-4 overflow-x-auto pb-4" style={{ minHeight: '55vh' }}>
+      <div className="flex gap-4 overflow-x-auto pb-4" style={{ minHeight: '60vh' }}>
         {COLUNAS_FACULDADE.map(col => {
-          const colItems = faculdadesFiltradas.filter(f => f.coluna === col)
+          const colFacs = faculdadesFiltradas.filter(f => f.coluna === col)
           return (
             <div
               key={col}
@@ -120,21 +133,22 @@ export function EducationBoard({ faculdades, setFaculdades }: EducationBoardProp
               <div className="flex items-center gap-2.5 mb-3 px-1">
                 <div className="w-2.5 h-2.5 rounded-full" style={{ background: CORES_COLUNAS_FACULDADE[col] }} />
                 <h3 className="text-slate-200 text-sm font-semibold">{col}</h3>
-                <span className="ml-auto text-xs bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full">{colItems.length}</span>
+                <span className="ml-auto text-xs bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full">{colFacs.length}</span>
               </div>
 
               <div className="flex-1 bg-slate-900/50 rounded-2xl p-3 space-y-3 border border-slate-800/60">
-                {colItems.map(fac => (
+                {colFacs.map(fac => (
                   <CartaoFaculdade
                     key={fac.id}
                     fac={fac}
                     arrastando={arrastando === fac.id}
                     onDragStart={() => handleDragStart(fac.id)}
                     onDragEnd={handleDragEnd}
+                    onClick={() => setFaculdadeSelecionada(fac)}
                     onRemover={() => remover(fac.id)}
                   />
                 ))}
-                {colItems.length === 0 && (
+                {colFacs.length === 0 && (
                   <div className="flex items-center justify-center h-20 text-slate-600 text-sm border-2 border-dashed border-slate-800 rounded-xl">
                     Arraste até aqui
                   </div>
@@ -145,10 +159,10 @@ export function EducationBoard({ faculdades, setFaculdades }: EducationBoardProp
         })}
       </div>
 
-      <p className="text-slate-600 text-xs mt-3 text-center md:text-left">Arraste as faculdades entre colunas para acompanhar o progresso da candidatura</p>
+      <p className="text-slate-600 text-xs mt-3 text-center md:text-left">Clique no cartão para detalhes completos ou arraste entre colunas</p>
 
-      {/* Modal */}
-      <Modal aberto={modal.aberto} onFechar={modal.fechar} titulo="Nova Faculdade">
+      {/* Modal Criar Nova Faculdade */}
+      <Modal aberto={modalNovo.aberto} onFechar={modalNovo.fechar} titulo="Nova Faculdade">
         <CampoTexto label="Instituição" valor={novaInstituicao} onChange={setNovaInstituicao} placeholder="Ex: Universidade de Coimbra" />
         <CampoTexto label="Curso" valor={novoCurso} onChange={setNovoCurso} placeholder="Ex: Engenharia Informática" />
         <div className="grid grid-cols-2 gap-3">
@@ -172,23 +186,34 @@ export function EducationBoard({ faculdades, setFaculdades }: EducationBoardProp
         <CampoToggle label="Aceita Diploma BR?" valor={novoAceitaDiploma} onChange={setNovoAceitaDiploma} />
         <BotaoSubmit label="Adicionar Faculdade" onClick={adicionar} />
       </Modal>
+
+      {/* Modal Detalhes da Faculdade */}
+      <EducationDetailModal
+        faculdade={faculdadeSelecionada}
+        onFechar={() => setFaculdadeSelecionada(null)}
+        onSalvar={salvarFaculdade}
+        onRemover={remover}
+      />
     </div>
   )
 }
 
-function CartaoFaculdade({ fac, arrastando, onDragStart, onDragEnd, onRemover }: {
-  fac: Faculdade; arrastando: boolean; onDragStart: () => void; onDragEnd: () => void; onRemover: () => void
+function CartaoFaculdade({ fac, arrastando, onDragStart, onDragEnd, onClick, onRemover }: {
+  fac: Faculdade; arrastando: boolean; onDragStart: () => void; onDragEnd: () => void; onClick: () => void; onRemover: () => void
 }) {
+  const numAnexos = fac.anexos?.length || 0
+
   return (
     <div
       draggable
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
-      className={`group bg-slate-800 border border-slate-700 rounded-xl p-4 cursor-grab active:cursor-grabbing transition-all duration-150 hover:border-slate-600 ${arrastando ? 'opacity-40 scale-95' : ''}`}
+      onClick={onClick}
+      className={`group bg-slate-800 border border-slate-700 hover:border-violet-500/50 rounded-xl p-4 cursor-pointer transition-all duration-150 shadow-sm hover:shadow-md ${arrastando ? 'opacity-40 scale-95' : ''}`}
     >
       <div className="flex items-start justify-between gap-2 mb-2">
         <div className="min-w-0 flex-1">
-          <p className="text-slate-100 text-sm font-semibold leading-tight">{fac.instituicao}</p>
+          <p className="text-slate-100 text-sm font-semibold leading-tight truncate">{fac.instituicao}</p>
           <p className="text-slate-400 text-xs mt-0.5 truncate">{fac.curso}</p>
         </div>
         <button
@@ -200,10 +225,10 @@ function CartaoFaculdade({ fac, arrastando, onDragStart, onDragEnd, onRemover }:
       </div>
 
       <div className="flex items-center gap-2 mb-3">
-        <span className="text-xs px-2 py-0.5 rounded-md bg-slate-700 text-slate-300 font-medium">
+        <span className="text-[11px] px-2 py-0.5 rounded-md bg-slate-700 text-slate-300 font-medium">
           {fac.tipoCurso}
         </span>
-        <span className="text-xs text-slate-500">📍 {fac.cidade}</span>
+        <span className="text-xs text-slate-400">📍 {fac.cidade}</span>
       </div>
 
       <div className="flex items-center justify-between mb-3">
@@ -214,23 +239,13 @@ function CartaoFaculdade({ fac, arrastando, onDragStart, onDragEnd, onRemover }:
       <div className="flex flex-wrap gap-1.5">
         <BadgePais pais={fac.pais} />
         {fac.bolsaCplp && (
-          <span className="text-xs px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">
+          <span className="text-[11px] px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">
             CPLP
           </span>
         )}
-        {fac.aceitaDiplomaBr && (
-          <span className="text-xs px-2 py-0.5 rounded-md bg-sky-500/10 text-sky-400 border border-sky-500/20 font-medium">
-            Diploma BR ✓
-          </span>
-        )}
-        {fac.aceitaEnem && (
-          <span className="text-xs px-2 py-0.5 rounded-md bg-violet-500/10 text-violet-400 border border-violet-500/20 font-medium">
-            ENEM ✓
-          </span>
-        )}
-        {fac.observacao && (
-          <span className="text-xs px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20">
-            ⚠ {fac.observacao}
+        {numAnexos > 0 && (
+          <span className="text-[11px] px-2 py-0.5 rounded-md bg-sky-500/10 text-sky-300 border border-sky-500/20 font-medium">
+            📎 {numAnexos} {numAnexos === 1 ? 'anexo' : 'anexos'}
           </span>
         )}
       </div>

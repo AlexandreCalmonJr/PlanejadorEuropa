@@ -35,7 +35,7 @@ export function Overview({ itensFinanceiros, documentos, etapasVisto, prazos }: 
   const receitas = itensFinanceiros.filter(i => i.tipo === 'receita')
 
   return (
-    <div className="p-6 md:p-8 max-w-5xl mx-auto pb-24 md:pb-8">
+    <div className="p-6 md:p-8 w-full pb-24 md:pb-8">
       <div className="mb-8">
         <h1 className="text-2xl font-semibold text-slate-100">Visão Geral</h1>
         <p className="text-slate-400 text-sm mt-1">Sua jornada de imigração · Alexandre & Andressa · Salvador → Coimbra</p>
