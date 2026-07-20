@@ -26,51 +26,78 @@ interface VisaTrackerProps {
 }
 
 export function VisaTracker({ setEtapas, setDocsConsulado }: VisaTrackerProps) {
-  const [vistoId, setVistoId] = useLocalStorage<TipoVistoId>('ep_visto_ativo_id', 'pt-d3')
+  // Lista e seleção de pessoas (requerentes)
+  const [pessoas, setPessoas] = useLocalStorage<string[]>('ep_vistos_pessoas', ['Alexandre', 'Andressa'])
+  const [pessoaAtiva, setPessoaAtiva] = useLocalStorage<string>('ep_visto_pessoa_ativa', 'Alexandre')
+
+  // Visto selecionado por pessoa
+  const [vistoIdPorPessoa, setVistoIdPorPessoa] = useLocalStorage<Record<string, TipoVistoId>>(
+    'ep_visto_id_por_pessoa',
+    { Alexandre: 'pt-d3', Andressa: 'pt-d4' }
+  )
+
+  const vistoId = vistoIdPorPessoa[pessoaAtiva] || 'pt-d3'
+  const setVistoId = (id: TipoVistoId) => {
+    setVistoIdPorPessoa(prev => ({ ...prev, [pessoaAtiva]: id }))
+  }
 
   // Obtem a configuracao do visto atualmente ativo
   const vistoAtivo = CONFIGS_VISTO.find(v => v.id === vistoId) || CONFIGS_VISTO[0]
 
-  // Status consular atual por visto
+  // Chave composta para isolar por pessoa + visto
+  const comboKey = `${pessoaAtiva}_${vistoId}`
+
+  // Status consular atual por pessoa + visto
   const [statusConsularPorVisto, setStatusConsularPorVisto] = useLocalStorage<Record<string, StatusConsularVisto>>(
     'ep_status_consular_por_visto',
     {
-      'pt-d3': 'VFS Enviado para Embaixada',
-      'pt-d8': 'Documentação Pronta',
-      'pt-procura': 'Documentação Pronta',
-      'pt-d4': 'Enviado para VFS',
-      'es-estudante': 'Documentação Pronta',
+      'Alexandre_pt-d3': 'VFS Enviado para Embaixada',
+      'Andressa_pt-d4': 'Enviado para VFS',
     }
   )
 
-  // Codigo de protocolo de rastreamento VFS por visto
+  // Historico de datas e horarios de cada fase trocada
+  const [historicoStatusPorVisto, setHistoricoStatusPorVisto] = useLocalStorage<Record<string, Record<string, string>>>(
+    'ep_visto_historico_status',
+    {
+      'Alexandre_pt-d3': {
+        'Documentação Pronta': '01/07/2026 10:00',
+        'Enviado para VFS': '10/07/2026 14:30',
+        'VFS Enviado para Embaixada': '18/07/2026 16:15',
+      },
+      'Andressa_pt-d4': {
+        'Documentação Pronta': '05/07/2026 09:30',
+        'Enviado para VFS': '15/07/2026 11:20',
+      }
+    }
+  )
+
+  // Codigo de protocolo de rastreamento VFS por pessoa + visto
   const [protocolosPorVisto, setProtocolosPorVisto] = useLocalStorage<Record<string, string>>(
     'ep_protocolos_vfs_por_visto',
     {
-      'pt-d3': 'BR-SSA-2026-98421-X',
+      'Alexandre_pt-d3': 'BR-SSA-2026-98421-X',
+      'Andressa_pt-d4': 'BR-SSA-2026-10492-Y',
     }
   )
 
-  const statusAtual = statusConsularPorVisto[vistoId] || 'Documentação Pronta'
-  const protocoloAtual = protocolosPorVisto[vistoId] || ''
+  const statusAtual = statusConsularPorVisto[comboKey] || statusConsularPorVisto[vistoId] || 'Documentação Pronta'
+  const protocoloAtual = protocolosPorVisto[comboKey] || protocolosPorVisto[vistoId] || ''
+  const historicoAtual = historicoStatusPorVisto[comboKey] || {}
 
-  // Estado local para etapas e docs de cada visto
+  // Estado local para etapas e docs de cada visto + pessoa
   const [etapasDoVisto, setEtapasDoVisto] = useLocalStorage<Record<string, EtapaVisto[]>>(
     'ep_etapas_por_visto',
-    {
-      [vistoAtivo.id]: vistoAtivo.etapas,
-    }
+    {}
   )
 
   const [docsDoVisto, setDocsDoVisto] = useLocalStorage<Record<string, DocConsulado[]>>(
     'ep_docs_por_visto',
-    {
-      [vistoAtivo.id]: vistoAtivo.docsConsulado,
-    }
+    {}
   )
 
-  const etapasAtuais = etapasDoVisto[vistoId] || vistoAtivo.etapas
-  const docsAtuais = docsDoVisto[vistoId] || vistoAtivo.docsConsulado
+  const etapasAtuais = etapasDoVisto[comboKey] || etapasDoVisto[vistoId] || vistoAtivo.etapas
+  const docsAtuais = docsDoVisto[comboKey] || docsDoVisto[vistoId] || vistoAtivo.docsConsulado
 
   // Estados para modais / formularios de criacao e edicao
   const [modalEtapaAberta, setModalEtapaAberta] = useState(false)
@@ -90,21 +117,40 @@ export function VisaTracker({ setEtapas, setDocsConsulado }: VisaTrackerProps) {
   const docsOk = docsAtuais.filter(d => d.ok).length
 
   const mudoStatusConsular = (novoStatus: StatusConsularVisto) => {
-    setStatusConsularPorVisto(prev => ({ ...prev, [vistoId]: novoStatus }))
+    setStatusConsularPorVisto(prev => ({ ...prev, [comboKey]: novoStatus }))
+
+    const agora = new Date()
+    const dia = String(agora.getDate()).padStart(2, '0')
+    const mes = String(agora.getMonth() + 1).padStart(2, '0')
+    const ano = agora.getFullYear()
+    const hora = String(agora.getHours()).padStart(2, '0')
+    const min = String(agora.getMinutes()).padStart(2, '0')
+    const dataHoraFormatada = `${dia}/${mes}/${ano} ${hora}:${min}`
+
+    setHistoricoStatusPorVisto(prev => {
+      const atual = prev[comboKey] || {}
+      return {
+        ...prev,
+        [comboKey]: {
+          ...atual,
+          [novoStatus]: dataHoraFormatada,
+        }
+      }
+    })
   }
 
   const mudoProtocolo = (proto: string) => {
-    setProtocolosPorVisto(prev => ({ ...prev, [vistoId]: proto }))
+    setProtocolosPorVisto(prev => ({ ...prev, [comboKey]: proto }))
   }
 
   const atualizarEtapas = (novasEtapas: EtapaVisto[]) => {
-    setEtapasDoVisto(prev => ({ ...prev, [vistoId]: novasEtapas }))
-    if (vistoId === 'pt-d3') setEtapas(novasEtapas)
+    setEtapasDoVisto(prev => ({ ...prev, [comboKey]: novasEtapas }))
+    if (pessoaAtiva === 'Alexandre' && vistoId === 'pt-d3') setEtapas(novasEtapas)
   }
 
   const atualizarDocs = (novosDocs: DocConsulado[]) => {
-    setDocsDoVisto(prev => ({ ...prev, [vistoId]: novosDocs }))
-    if (vistoId === 'pt-d3') setDocsConsulado(novosDocs)
+    setDocsDoVisto(prev => ({ ...prev, [comboKey]: novosDocs }))
+    if (pessoaAtiva === 'Alexandre' && vistoId === 'pt-d3') setDocsConsulado(novosDocs)
   }
 
   const avancarEtapa = (id: string) => {
@@ -220,12 +266,93 @@ export function VisaTracker({ setEtapas, setDocsConsulado }: VisaTrackerProps) {
     if (isSupabaseConfigured) deletarItemSupabase('docs_consulado', id)
   }
 
+  const editarDataManual = (faseNome: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation()
+    const valorAtual = historicoAtual[faseNome] || ''
+    const entrada = prompt(`Digite a data e horário para a fase "${faseNome}":\n(Exemplo: 20/07/2026 14:30)`, valorAtual)
+    if (entrada !== null) {
+      setHistoricoStatusPorVisto(prev => {
+        const atual = prev[comboKey] || {}
+        if (!entrada.trim()) {
+          const copia = { ...atual }
+          delete copia[faseNome]
+          return { ...prev, [comboKey]: copia }
+        }
+        return {
+          ...prev,
+          [comboKey]: {
+            ...atual,
+            [faseNome]: entrada.trim(),
+          }
+        }
+      })
+    }
+  }
+
   return (
     <div className="p-6 md:p-8 pb-24 md:pb-8 w-full space-y-6">
       {/* Cabecalho */}
-      <div>
-        <h1 className="text-2xl font-semibold text-slate-100">Planejamento de Visto & Imigração</h1>
-        <p className="text-slate-400 text-sm mt-1">Gerencie etapas personalizadas, checklist consular e a tramitação VFS Global</p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+        <div>
+          <h1 className="text-2xl font-semibold text-slate-100 flex items-center gap-2 flex-wrap">
+            <span>Planejamento de Visto & Imigração</span>
+            <span className="text-xs px-3 py-1 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30 font-bold">
+              👤 {pessoaAtiva}
+            </span>
+          </h1>
+          <p className="text-slate-400 text-sm mt-1">
+            Gerencie o processo consular, checklist e tramitação VFS de <strong className="text-slate-200">{pessoaAtiva}</strong>
+          </p>
+        </div>
+
+        {/* Seletor de Requerente / Pessoa */}
+        <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 p-1.5 rounded-2xl shrink-0 flex-wrap">
+          <span className="text-xs font-semibold text-slate-400 pl-2">Requerente:</span>
+          {pessoas.map(p => (
+            <button
+              key={p}
+              onClick={() => setPessoaAtiva(p)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                pessoaAtiva === p
+                  ? 'bg-sky-500 text-slate-950 shadow-md scale-105'
+                  : 'bg-slate-950 text-slate-400 hover:text-slate-200 border border-slate-800 hover:border-slate-700'
+              }`}
+            >
+              <span>👤</span>
+              <span>{p}</span>
+            </button>
+          ))}
+          <button
+            onClick={() => {
+              const nome = prompt('Digite o nome do requerente / pessoa:')
+              if (nome && nome.trim()) {
+                const limpo = nome.trim()
+                if (!pessoas.includes(limpo)) {
+                  setPessoas(prev => [...prev, limpo])
+                }
+                setPessoaAtiva(limpo)
+              }
+            }}
+            className="px-2.5 py-1.5 rounded-xl text-xs font-medium text-sky-400 bg-sky-500/10 border border-sky-500/20 hover:bg-sky-500/20 transition-all flex items-center gap-1"
+          >
+            <span>+</span> Nova Pessoa
+          </button>
+          {pessoas.length > 1 && (
+            <button
+              onClick={() => {
+                if (confirm(`Remover ${pessoaAtiva} da lista de vistos?`)) {
+                  const novas = pessoas.filter(p => p !== pessoaAtiva)
+                  setPessoas(novas)
+                  setPessoaAtiva(novas[0] || 'Alexandre')
+                }
+              }}
+              className="px-2 py-1.5 rounded-xl text-xs text-red-400 hover:bg-red-500/10 border border-red-500/20 transition-all"
+              title={`Remover ${pessoaAtiva}`}
+            >
+              🗑️
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Seletor de Vistos */}
@@ -279,34 +406,121 @@ export function VisaTracker({ setEtapas, setDocsConsulado }: VisaTrackerProps) {
           </div>
         </div>
 
-        {/* Pipeline de Status Consular Realista */}
-        <div>
-          <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2">
-            Status da Tramitação no Consulado / VFS Global
-          </label>
+        {/* Pipeline de Status Consular Com Horarios */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">
+              Status da Tramitação no Consulado / VFS Global ({pessoaAtiva})
+            </label>
+            <span className="text-[11px] text-amber-400 font-medium">
+              💡 Clique na fase para alternar status ou clique no ✏️ para editar a data manualmente
+            </span>
+          </div>
+
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-            {STATUS_CONSULARES.map((s, idx) => (
-              <button
-                key={s}
-                onClick={() => mudoStatusConsular(s)}
-                className={`p-2.5 rounded-xl border text-xs text-left transition-all flex flex-col justify-between ${
-                  statusAtual === s
-                    ? 'bg-amber-500/20 border-amber-500 text-amber-300 font-bold shadow-md'
-                    : 'bg-slate-950/60 border-slate-800/80 text-slate-400 hover:border-slate-700 hover:text-slate-200'
-                }`}
-              >
-                <span className="text-[10px] text-slate-500 font-normal">{idx + 1}. FASE</span>
-                <span className="truncate leading-tight mt-0.5">{s}</span>
-              </button>
-            ))}
+            {STATUS_CONSULARES.map((s, idx) => {
+              const dataFase = historicoAtual[s]
+              const isAtual = statusAtual === s
+
+              return (
+                <div
+                  key={s}
+                  onClick={() => mudoStatusConsular(s)}
+                  className={`p-3 rounded-xl border text-xs text-left transition-all flex flex-col justify-between min-h-[85px] cursor-pointer group/card ${
+                    isAtual
+                      ? 'bg-amber-500/20 border-amber-500 text-amber-300 font-bold shadow-md ring-1 ring-amber-500/50'
+                      : 'bg-slate-950/60 border-slate-800/80 text-slate-400 hover:border-slate-700 hover:text-slate-200'
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-1 w-full mb-1">
+                    <span className="text-[10px] text-slate-500 font-normal">{idx + 1}. FASE</span>
+                    <button
+                      type="button"
+                      onClick={e => editarDataManual(s, e)}
+                      className="text-[10px] px-1.5 py-0.5 rounded bg-slate-900 hover:bg-amber-500/20 text-amber-300/90 font-mono border border-amber-500/20 transition-all flex items-center gap-1"
+                      title="Clique para editar a data e horário manualmente"
+                    >
+                      <span>{dataFase ? `🕒 ${dataFase}` : '✏️ Data'}</span>
+                    </button>
+                  </div>
+                  <span className="truncate leading-tight font-semibold mt-0.5">{s}</span>
+                  {isAtual && (
+                    <div className="mt-2 text-[10px] text-amber-400 font-medium flex items-center gap-1.5 border-t border-amber-500/30 pt-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse shrink-0" />
+                      <span className="truncate">Fase Atual {dataFase ? `· ${dataFase}` : ''}</span>
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+
+          {/* Timeline de Historico Consular */}
+          <div className="mt-4 pt-3 border-t border-slate-800/80">
+            <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
+              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">
+                🕒 Histórico Registrado de Tramitação ({pessoaAtiva})
+              </span>
+              {Object.keys(historicoAtual).length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (confirm(`Deseja limpar todo o histórico de datas da tramitação de ${pessoaAtiva}?`)) {
+                      setHistoricoStatusPorVisto(prev => ({ ...prev, [comboKey]: {} }))
+                    }
+                  }}
+                  className="px-2.5 py-1 rounded-lg text-xs font-medium text-red-400 hover:text-red-300 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 transition-all flex items-center gap-1"
+                >
+                  <span>🗑️</span> Limpar Histórico
+                </button>
+              )}
+            </div>
+
+            {Object.keys(historicoAtual).length === 0 ? (
+              <p className="text-slate-500 text-xs py-2 italic">Nenhum histórico registrado ainda. Clique em uma fase acima para registrar a data/hora.</p>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                {STATUS_CONSULARES.map((s, idx) => {
+                  const dataHora = historicoAtual[s]
+                  if (!dataHora) return null
+                  const isAtual = statusAtual === s
+                  return (
+                    <div
+                      key={s}
+                      className={`p-2.5 rounded-xl border text-xs flex flex-col justify-between ${
+                        isAtual
+                          ? 'bg-amber-500/15 border-amber-500/40 text-amber-200 font-semibold'
+                          : 'bg-slate-950/40 border-slate-800/80 text-slate-400'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between text-[10px] text-slate-500 mb-1">
+                        <span>Fase {idx + 1}</span>
+                        <div className="flex items-center gap-1">
+                          <span className="font-mono text-amber-300 font-bold">{dataHora}</span>
+                          <button
+                            type="button"
+                            onClick={e => editarDataManual(s, e)}
+                            className="hover:text-amber-300 p-0.5 transition-all"
+                            title="Editar esta data/hora"
+                          >
+                            ✏️
+                          </button>
+                        </div>
+                      </div>
+                      <p className="truncate font-medium">{s}</p>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
           </div>
         </div>
 
         {/* Info Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-2">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-2 border-t border-slate-800/80">
+          <InfoCardVisto label="Requerente Ativo" valor={pessoaAtiva} icone="👤" />
           <InfoCardVisto label="Visto Selecionado" valor={vistoAtivo.codigo} icone="🛂" />
           <InfoCardVisto label="Consulado Base" valor={vistoAtivo.consulado.split('(')[0]} icone="🏛️" />
-          <InfoCardVisto label="Estimativa Envio" valor={vistoAtivo.agendamentoEstimado} icone="📅" />
           <InfoCardVisto label="Prazo de Análise" valor={vistoAtivo.prazoEstimado} icone="⏳" />
         </div>
 
@@ -462,10 +676,11 @@ export function VisaTracker({ setEtapas, setDocsConsulado }: VisaTrackerProps) {
 
           <div className="space-y-2">
             {docsAtuais.map((doc, i) => {
-              const editando = docEmEdicaoId === doc.id
+              const docId = doc.id || `doc-${i}`
+              const editando = docEmEdicaoId === docId
               return (
                 <div
-                  key={doc.id || i}
+                  key={docId}
                   className={`w-full flex items-center justify-between gap-3 p-3 rounded-xl border transition-all duration-150 ${
                     doc.ok
                       ? 'bg-emerald-500/5 border-emerald-500/20'
@@ -487,7 +702,7 @@ export function VisaTracker({ setEtapas, setDocsConsulado }: VisaTrackerProps) {
                         type="text"
                         value={editDocLabel}
                         onChange={e => setEditDocLabel(e.target.value)}
-                        onKeyDown={e => e.key === 'Enter' && salvarEdicaoDoc(doc.id)}
+                        onKeyDown={e => e.key === 'Enter' && salvarEdicaoDoc(docId)}
                         autoFocus
                         className="flex-1 bg-slate-950 border border-teal-500/50 rounded px-2 py-1 text-xs text-slate-200 focus:outline-none"
                       />
@@ -506,7 +721,7 @@ export function VisaTracker({ setEtapas, setDocsConsulado }: VisaTrackerProps) {
                   <div className="flex items-center gap-1">
                     {editando ? (
                       <button
-                        onClick={() => salvarEdicaoDoc(doc.id)}
+                        onClick={() => salvarEdicaoDoc(docId)}
                         className="text-xs text-teal-400 font-bold px-2 py-0.5 rounded hover:bg-slate-800"
                       >
                         Salvar
@@ -515,7 +730,7 @@ export function VisaTracker({ setEtapas, setDocsConsulado }: VisaTrackerProps) {
                       <>
                         <button
                           onClick={() => {
-                            setDocEmEdicaoId(doc.id)
+                            setDocEmEdicaoId(docId)
                             setEditDocLabel(doc.label)
                           }}
                           title="Editar requisito"
@@ -524,7 +739,7 @@ export function VisaTracker({ setEtapas, setDocsConsulado }: VisaTrackerProps) {
                           ✏️
                         </button>
                         <button
-                          onClick={() => excluirDoc(doc.id)}
+                          onClick={() => excluirDoc(docId)}
                           title="Remover documento"
                           className="p-1 rounded text-slate-500 hover:text-red-400 hover:bg-slate-800 text-xs transition-colors"
                         >

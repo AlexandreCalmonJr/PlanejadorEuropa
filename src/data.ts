@@ -15,13 +15,13 @@ import type {
 // ─── Vagas ────────────────────────────────────────────────────────────────────
 
 export const VAGAS_INICIAIS: Vaga[] = [
-  { id: 'j1', empresa: 'Critical TechWorks', cargo: 'Desenvolvedor Full Stack', salarioMin: 35000, salarioMax: 45000, patrocinioVisto: true, coluna: 'Candidatado', inicial: 'C', cor: '#14B8A6', cidade: 'Coimbra', modelo: 'Híbrido', stack: ['React', 'Node.js', 'Python'] },
-  { id: 'j2', empresa: 'WIT Software', cargo: 'Engenheiro Mobile (Flutter)', salarioMin: 30000, salarioMax: 40000, patrocinioVisto: true, coluna: 'Candidatado', inicial: 'W', cor: '#8B5CF6', cidade: 'Coimbra', modelo: 'Presencial', stack: ['Flutter', 'Dart'] },
-  { id: 'j3', empresa: 'Feedzai', cargo: 'Backend Developer', salarioMin: 45000, salarioMax: 60000, patrocinioVisto: true, coluna: 'Triagem RH', inicial: 'F', cor: '#0284C7', cidade: 'Coimbra', modelo: 'Híbrido', stack: ['Python', 'Java', 'AWS'] },
-  { id: 'j4', empresa: 'Celfocus', cargo: 'Desenvolvedor React Sênior', salarioMin: 40000, salarioMax: 55000, patrocinioVisto: false, coluna: 'Triagem RH', inicial: 'C', cor: '#F97316', cidade: 'Porto', modelo: 'Remoto', stack: ['React', 'TypeScript', 'Node.js'] },
-  { id: 'j5', empresa: 'Talkdesk', cargo: 'Software Engineer II', salarioMin: 50000, salarioMax: 70000, patrocinioVisto: true, coluna: 'Entrevista Técnica', inicial: 'T', cor: '#EC4899', cidade: 'Coimbra', modelo: 'Híbrido', stack: ['Node.js', 'React', 'PostgreSQL'] },
-  { id: 'j6', empresa: 'Unbabel', cargo: 'Full Stack Developer', salarioMin: 42000, salarioMax: 55000, patrocinioVisto: true, coluna: 'Entrevista Técnica', inicial: 'U', cor: '#10B981', cidade: 'Lisboa', modelo: 'Remoto', stack: ['Python', 'React', 'Django'] },
-  { id: 'j7', empresa: 'OutSystems', cargo: 'Engenheiro Principal', salarioMin: 65000, salarioMax: 85000, patrocinioVisto: true, coluna: 'Oferta', inicial: 'O', cor: '#E11D48', cidade: 'Lisboa', modelo: 'Híbrido', stack: ['React', 'Node.js', '.NET'] },
+  { id: 'j1', empresa: 'Critical TechWorks', cargo: 'Desenvolvedor Full Stack', salarioMin: 35000, salarioMax: 45000, patrocinioVisto: true, coluna: 'Candidatado', inicial: 'C', cor: '#14B8A6', cidade: 'Coimbra', modelo: 'Híbrido', responsavel: 'Alexandre', stack: ['React', 'Node.js', 'Python'] },
+  { id: 'j2', empresa: 'WIT Software', cargo: 'Engenheiro Mobile (Flutter)', salarioMin: 30000, salarioMax: 40000, patrocinioVisto: true, coluna: 'Candidatado', inicial: 'W', cor: '#8B5CF6', cidade: 'Coimbra', modelo: 'Presencial', responsavel: 'Alexandre', stack: ['Flutter', 'Dart'] },
+  { id: 'j3', empresa: 'Feedzai', cargo: 'Backend Developer', salarioMin: 45000, salarioMax: 60000, patrocinioVisto: true, coluna: 'Triagem RH', inicial: 'F', cor: '#0284C7', cidade: 'Coimbra', modelo: 'Híbrido', responsavel: 'Alexandre', stack: ['Python', 'Java', 'AWS'] },
+  { id: 'j4', empresa: 'Celfocus', cargo: 'Desenvolvedor React Sênior', salarioMin: 40000, salarioMax: 55000, patrocinioVisto: false, coluna: 'Triagem RH', inicial: 'C', cor: '#F97316', cidade: 'Porto', modelo: 'Remoto', responsavel: 'Andressa', stack: ['React', 'TypeScript', 'Node.js'] },
+  { id: 'j5', empresa: 'Talkdesk', cargo: 'Software Engineer II', salarioMin: 50000, salarioMax: 70000, patrocinioVisto: true, coluna: 'Entrevista Técnica', inicial: 'T', cor: '#EC4899', cidade: 'Coimbra', modelo: 'Híbrido', responsavel: 'Alexandre', stack: ['Node.js', 'React', 'PostgreSQL'] },
+  { id: 'j6', empresa: 'Unbabel', cargo: 'Full Stack Developer', salarioMin: 42000, salarioMax: 55000, patrocinioVisto: true, coluna: 'Entrevista Técnica', inicial: 'U', cor: '#10B981', cidade: 'Lisboa', modelo: 'Remoto', responsavel: 'Andressa', stack: ['Python', 'React', 'Django'] },
+  { id: 'j7', empresa: 'OutSystems', cargo: 'Engenheiro Principal', salarioMin: 65000, salarioMax: 85000, patrocinioVisto: true, coluna: 'Oferta', inicial: 'O', cor: '#E11D48', cidade: 'Lisboa', modelo: 'Híbrido', responsavel: 'Alexandre', stack: ['React', 'Node.js', '.NET'] },
 ]
 
 // ─── Faculdades ───────────────────────────────────────────────────────────────
@@ -33,35 +33,35 @@ export const FACULDADES_INICIAIS: Faculdade[] = [
     tipoCurso: 'Licenciatura', area: 'Tecnologia', cidade: 'Coimbra', pais: 'PT',
     taxaCandidaturaEur: 50, matriculaEur: 20, propinaAnualEur: 7000,
     parcelamento: 10, aceitaEnem: true, aceitaDiplomaBr: false, bolsaCplp: false,
-    coluna: 'Pesquisando', cor: '#0284C7',
+    coluna: 'Pesquisando', cor: '#0284C7', responsavel: 'Alexandre',
   },
   {
     id: 'f2', instituicao: 'Universidade de Coimbra (UC)', curso: 'Mestrado em Eng. Informática',
     tipoCurso: 'Mestrado', area: 'Tecnologia', cidade: 'Coimbra', pais: 'PT',
     taxaCandidaturaEur: 50, matriculaEur: 20, propinaAnualEur: 7000,
     parcelamento: 10, aceitaEnem: false, aceitaDiplomaBr: true, bolsaCplp: false,
-    coluna: 'Pesquisando', cor: '#14B8A6',
+    coluna: 'Pesquisando', cor: '#14B8A6', responsavel: 'Alexandre',
   },
   {
     id: 'f3', instituicao: 'IPC — ISEC', curso: 'Eng. Informática e Computadores',
     tipoCurso: 'Licenciatura', area: 'Tecnologia', cidade: 'Coimbra', pais: 'PT',
     taxaCandidaturaEur: 30, matriculaEur: 25, propinaAnualEur: 3000,
     parcelamento: 12, aceitaEnem: true, aceitaDiplomaBr: false, bolsaCplp: true,
-    coluna: 'Candidatura', cor: '#8B5CF6',
+    coluna: 'Candidatura', cor: '#8B5CF6', responsavel: 'Alexandre',
   },
   {
     id: 'f4', instituicao: 'IPC — ISEC', curso: 'Desenvolvimento de Software',
     tipoCurso: 'Mestrado', area: 'Tecnologia', cidade: 'Coimbra', pais: 'PT',
     taxaCandidaturaEur: 30, matriculaEur: 25, propinaAnualEur: 3000,
     parcelamento: 12, aceitaEnem: false, aceitaDiplomaBr: true, bolsaCplp: true,
-    coluna: 'Pesquisando', cor: '#F59E0B',
+    coluna: 'Pesquisando', cor: '#F59E0B', responsavel: 'Alexandre',
   },
   {
     id: 'f5', instituicao: 'IPC — ISCAC', curso: 'Gestão Empresarial',
     tipoCurso: 'Mestrado', area: 'Gestão / Logística', cidade: 'Coimbra', pais: 'PT',
     taxaCandidaturaEur: 30, matriculaEur: 25, propinaAnualEur: 2500,
     parcelamento: 12, aceitaEnem: false, aceitaDiplomaBr: true, bolsaCplp: true,
-    coluna: 'Pesquisando', cor: '#10B981',
+    coluna: 'Pesquisando', cor: '#10B981', responsavel: 'Andressa',
   },
   // Espanha — Plano B
   {
@@ -69,7 +69,7 @@ export const FACULDADES_INICIAIS: Faculdade[] = [
     tipoCurso: 'Grado', area: 'Tecnologia', cidade: 'Salamanca', pais: 'ES',
     taxaCandidaturaEur: 70, matriculaEur: 0, propinaAnualEur: 1500,
     aceitaEnem: false, aceitaDiplomaBr: false, bolsaCplp: false,
-    coluna: 'Pesquisando', cor: '#EF4444',
+    coluna: 'Pesquisando', cor: '#EF4444', responsavel: 'Andressa',
     observacao: 'Requer homologação UNEDasiss',
   },
   {
@@ -77,7 +77,7 @@ export const FACULDADES_INICIAIS: Faculdade[] = [
     tipoCurso: 'Grado', area: 'Tecnologia', cidade: 'Sevilha', pais: 'ES',
     taxaCandidaturaEur: 60, matriculaEur: 0, propinaAnualEur: 1200,
     aceitaEnem: false, aceitaDiplomaBr: false, bolsaCplp: false,
-    coluna: 'Pesquisando', cor: '#F97316',
+    coluna: 'Pesquisando', cor: '#F97316', responsavel: 'Andressa',
     observacao: 'Andaluzia — custos mais baixos',
   },
   {
@@ -85,7 +85,7 @@ export const FACULDADES_INICIAIS: Faculdade[] = [
     tipoCurso: 'Grado', area: 'Tecnologia', cidade: 'Madrid', pais: 'ES',
     taxaCandidaturaEur: 80, matriculaEur: 0, propinaAnualEur: 4500,
     aceitaEnem: false, aceitaDiplomaBr: false, bolsaCplp: false,
-    coluna: 'Pesquisando', cor: '#EC4899',
+    coluna: 'Pesquisando', cor: '#EC4899', responsavel: 'Andressa',
     observacao: 'Custo mais elevado — região de Madrid',
   },
   {
@@ -93,7 +93,7 @@ export const FACULDADES_INICIAIS: Faculdade[] = [
     tipoCurso: 'Máster', area: 'Tecnologia', cidade: 'Valência', pais: 'ES',
     taxaCandidaturaEur: 75, matriculaEur: 0, propinaAnualEur: 2800,
     aceitaEnem: false, aceitaDiplomaBr: true, bolsaCplp: false,
-    coluna: 'Pesquisando', cor: '#6366F1',
+    coluna: 'Pesquisando', cor: '#6366F1', responsavel: 'Andressa',
     observacao: 'Homologação de diploma obrigatória',
   },
 ]
@@ -102,20 +102,20 @@ export const FACULDADES_INICIAIS: Faculdade[] = [
 
 export const DOCUMENTOS_INICIAIS: Documento[] = [
   // Portugal
-  { id: 'd1', nome: 'Passaportes (Titular + Dependente)', descricao: 'Polícia Federal · Válido por 10 anos', status: 'Concluído', pais: 'AMBOS' },
-  { id: 'd2', nome: 'Apostila de Haia — Certidão de Casamento', descricao: 'Cartório · Apostilamento no padrão internacional', status: 'Concluído', pais: 'AMBOS' },
-  { id: 'd3', nome: 'Apostila de Haia — Diplomas', descricao: 'Cartório · Graduação em Logística apostilada', status: 'Em Andamento', pais: 'AMBOS' },
-  { id: 'd4', nome: 'Certidão de Antecedentes Criminais', descricao: 'Polícia Federal + Polícia Civil BA · Apostilada', status: 'Em Andamento', pais: 'AMBOS' },
-  { id: 'd5', nome: 'PB4 / CDAM (Seguro Saúde)', descricao: 'Ministério da Saúde · Acordo bilateral BR-PT · Substitui seguro viagem', status: 'Pendente', bloqueadoPor: ['d4'], pais: 'PT' },
-  { id: 'd6', nome: 'NIF (Número de Identificação Fiscal)', descricao: 'Finanças de Portugal · Via Representante Fiscal (Mãe em Coimbra)', status: 'Em Andamento', pais: 'PT' },
-  { id: 'd7', nome: 'Carta Convite / Termo de Responsabilidade', descricao: 'Emitido pela Mãe em Coimbra · Registrado em notário português', status: 'Pendente', pais: 'PT' },
-  { id: 'd8', nome: 'NISS (Segurança Social)', descricao: 'Segurança Social Portugal · Necessário para contrato de trabalho', status: 'Pendente', bloqueadoPor: ['d6'], pais: 'PT' },
-  { id: 'd9', nome: 'Visto D3 / Procura de Trabalho', descricao: 'Consulado de Portugal · Pedido principal do visto', status: 'Pendente', bloqueadoPor: ['d4', 'd5', 'd7'], pais: 'PT' },
+  { id: 'd1', nome: 'Passaportes (Titular + Dependente)', descricao: 'Polícia Federal · Válido por 10 anos', status: 'Concluído', pais: 'AMBOS', pessoa: 'Ambos' },
+  { id: 'd2', nome: 'Apostila de Haia — Certidão de Casamento', descricao: 'Cartório · Apostilamento no padrão internacional', status: 'Concluído', pais: 'AMBOS', pessoa: 'Ambos' },
+  { id: 'd3', nome: 'Apostila de Haia — Diplomas', descricao: 'Cartório · Graduação em Logística apostilada', status: 'Em Andamento', pais: 'AMBOS', pessoa: 'Alexandre' },
+  { id: 'd4', nome: 'Certidão de Antecedentes Criminais', descricao: 'Polícia Federal + Polícia Civil BA · Apostilada', status: 'Em Andamento', pais: 'AMBOS', pessoa: 'Alexandre' },
+  { id: 'd5', nome: 'PB4 / CDAM (Seguro Saúde)', descricao: 'Ministério da Saúde · Acordo bilateral BR-PT · Substitui seguro viagem', status: 'Pendente', bloqueadoPor: ['d4'], pais: 'PT', pessoa: 'Alexandre' },
+  { id: 'd6', nome: 'NIF (Número de Identificação Fiscal)', descricao: 'Finanças de Portugal · Via Representante Fiscal (Mãe em Coimbra)', status: 'Em Andamento', pais: 'PT', pessoa: 'Alexandre' },
+  { id: 'd7', nome: 'Carta Convite / Termo de Responsabilidade', descricao: 'Emitido pela Mãe em Coimbra · Registrado em notário português', status: 'Pendente', pais: 'PT', pessoa: 'Ambos' },
+  { id: 'd8', nome: 'NISS (Segurança Social)', descricao: 'Segurança Social Portugal · Necessário para contrato de trabalho', status: 'Pendente', bloqueadoPor: ['d6'], pais: 'PT', pessoa: 'Alexandre' },
+  { id: 'd9', nome: 'Visto D3 / Procura de Trabalho', descricao: 'Consulado de Portugal · Pedido principal do visto', status: 'Pendente', bloqueadoPor: ['d4', 'd5', 'd7'], pais: 'PT', pessoa: 'Alexandre' },
   // Espanha
-  { id: 'd10', nome: 'Credencial UNEDasiss', descricao: 'Homologação obrigatória de notas brasileiras para o sistema espanhol', status: 'Pendente', pais: 'ES' },
-  { id: 'd11', nome: 'NIE (Número de Identidad de Extranjero)', descricao: 'Identificação fiscal de estrangeiro na Espanha', status: 'Pendente', pais: 'ES' },
-  { id: 'd12', nome: 'Empadronamiento', descricao: 'Registro de residência no ayuntamiento local', status: 'Pendente', bloqueadoPor: ['d11'], pais: 'ES' },
-  { id: 'd13', nome: 'Seguro Médico Privado', descricao: 'Obrigatório para visto de estudante na Espanha (mín. €30.000 cobertura)', status: 'Pendente', pais: 'ES' },
+  { id: 'd10', nome: 'Credencial UNEDasiss', descricao: 'Homologação obrigatória de notas brasileiras para o sistema espanhol', status: 'Pendente', pais: 'ES', pessoa: 'Andressa' },
+  { id: 'd11', nome: 'NIE (Número de Identidad de Extranjero)', descricao: 'Identificação fiscal de estrangeiro na Espanha', status: 'Pendente', pais: 'ES', pessoa: 'Andressa' },
+  { id: 'd12', nome: 'Empadronamiento', descricao: 'Registro de residência no ayuntamiento local', status: 'Pendente', bloqueadoPor: ['d11'], pais: 'ES', pessoa: 'Ambos' },
+  { id: 'd13', nome: 'Seguro Médico Privado', descricao: 'Obrigatório para visto de estudante na Espanha (mín. €30.000 cobertura)', status: 'Pendente', pais: 'ES', pessoa: 'Andressa' },
 ]
 
 // ─── Finanças ─────────────────────────────────────────────────────────────────
@@ -184,15 +184,15 @@ export const ETAPAS_VISTO_INICIAIS: EtapaVisto[] = [
 ]
 
 export const DOCS_CONSULADO_INICIAIS: DocConsulado[] = [
-  { label: 'Formulário de pedido de visto (impresso e assinado)', ok: true },
-  { label: 'Passaporte válido + 2 cópias', ok: true },
-  { label: '2 fotos 3×4 recentes (fundo branco)', ok: true },
-  { label: 'Certidão de antecedentes criminais apostilada', ok: false },
-  { label: 'Autorização PB4 original', ok: false },
-  { label: 'Contrato de trabalho / promessa de contrato em Portugal', ok: false },
-  { label: 'Comprovante de meios de subsistência (extrato bancário)', ok: true },
-  { label: 'Carta Convite / Termo de Responsabilidade (Mãe)', ok: false },
-  { label: 'Seguro de viagem/saúde com cobertura mínima de €30.000', ok: false },
+  { id: 'dc1', label: 'Formulário de pedido de visto (impresso e assinado)', ok: true },
+  { id: 'dc2', label: 'Passaporte válido + 2 cópias', ok: true },
+  { id: 'dc3', label: '2 fotos 3×4 recentes (fundo branco)', ok: true },
+  { id: 'dc4', label: 'Certidão de antecedentes criminais apostilada', ok: false },
+  { id: 'dc5', label: 'Autorização PB4 original', ok: false },
+  { id: 'dc6', label: 'Contrato de trabalho / promessa de contrato em Portugal', ok: false },
+  { id: 'dc7', label: 'Comprovante de meios de subsistência (extrato bancário)', ok: true },
+  { id: 'dc8', label: 'Carta Convite / Termo de Responsabilidade (Mãe)', ok: false },
+  { id: 'dc9', label: 'Seguro de viagem/saúde com cobertura mínima de €30.000', ok: false },
 ]
 
 // ─── Tipos de Visto Configuráveis ─────────────────────────────────────────────
@@ -232,14 +232,14 @@ export const CONFIGS_VISTO: ConfigVisto[] = [
       'Extrato bancário dos últimos 3 meses comprovando receita constante',
     ],
     docsConsulado: [
-      { label: 'Formulário D8 preenchido e assinado', ok: true },
-      { label: 'Passaporte válido (mínimo 1 ano)', ok: true },
-      { label: 'Contrato de trabalho ou prestação de serviços remoto', ok: true },
-      { label: 'Comprovativo de rendimentos (€3.280/mês nos últimos 3 meses)', ok: false },
-      { label: 'Comprovativo de residência fiscal (Declaração IR)', ok: false },
-      { label: 'Certidão de antecedentes criminais com Haia', ok: false },
-      { label: 'PB4 / Seguro Saúde Internacional', ok: false },
-      { label: 'Comprovativo de alojamento em Portugal (Termo/Aluguel)', ok: false },
+      { id: 'd8-doc-1', label: 'Formulário D8 preenchido e assinado', ok: true },
+      { id: 'd8-doc-2', label: 'Passaporte válido (mínimo 1 ano)', ok: true },
+      { id: 'd8-doc-3', label: 'Contrato de trabalho ou prestação de serviços remoto', ok: true },
+      { id: 'd8-doc-4', label: 'Comprovativo de rendimentos (€3.280/mês nos últimos 3 meses)', ok: false },
+      { id: 'd8-doc-5', label: 'Comprovativo de residência fiscal (Declaração IR)', ok: false },
+      { id: 'd8-doc-6', label: 'Certidão de antecedentes criminais com Haia', ok: false },
+      { id: 'd8-doc-7', label: 'PB4 / Seguro Saúde Internacional', ok: false },
+      { id: 'd8-doc-8', label: 'Comprovativo de alojamento em Portugal (Termo/Aluguel)', ok: false },
     ],
     etapas: [
       { id: 'd8-1', titulo: 'Comprovação de Rendimentos Remotos', descricao: 'Reunir extratos bancários de 3 meses comprovando €3.280+/mês.', status: 'Em Andamento', data: 'Ago 2026' },
@@ -264,13 +264,13 @@ export const CONFIGS_VISTO: ConfigVisto[] = [
       'Alojamento em Portugal garantido pelo período inicial',
     ],
     docsConsulado: [
-      { label: 'Inscrição no portal do IEFP realizada', ok: true },
-      { label: 'Formulário consular preenchido', ok: true },
-      { label: 'Passaporte válido + cópias', ok: true },
-      { label: 'Comprovante de €2.460 em conta', ok: false },
-      { label: 'Reserva de passagem de regresso ou idônea', ok: false },
-      { label: 'Antecedentes criminais com Haia', ok: false },
-      { label: 'PB4 / Seguro de Viagem', ok: false },
+      { id: 'vpt-doc-1', label: 'Inscrição no portal do IEFP realizada', ok: true },
+      { id: 'vpt-doc-2', label: 'Formulário consular preenchido', ok: true },
+      { id: 'vpt-doc-3', label: 'Passaporte válido + cópias', ok: true },
+      { id: 'vpt-doc-4', label: 'Comprovante de €2.460 em conta', ok: false },
+      { id: 'vpt-doc-5', label: 'Reserva de passagem de regresso ou idônea', ok: false },
+      { id: 'vpt-doc-6', label: 'Antecedentes criminais com Haia', ok: false },
+      { id: 'vpt-doc-7', label: 'PB4 / Seguro de Viagem', ok: false },
     ],
     etapas: [
       { id: 'vpt-1', titulo: 'Cadastro no IEFP Portugal', descricao: 'Registo completo no portal do emprego de Portugal.', status: 'Concluído', data: 'Jul 2026' },
@@ -295,13 +295,13 @@ export const CONFIGS_VISTO: ConfigVisto[] = [
       'Alojamento (Residência universitária, aluguel ou Carta Convite)',
     ],
     docsConsulado: [
-      { label: 'Carta de Aceitação da Universidade', ok: true },
-      { label: 'Comprovativo de pagamento de propina/matricula', ok: true },
-      { label: 'Formulário D4 preenchido', ok: true },
-      { label: 'Passaporte + 2 cópias', ok: true },
-      { label: 'Extrato de subsistência (mínimo €820/mês de permanência)', ok: false },
-      { label: 'PB4 / Seguro saúde', ok: false },
-      { label: 'Certidão de antecedentes criminais apostilada', ok: false },
+      { id: 'd4-doc-1', label: 'Carta de Aceitação da Universidade', ok: true },
+      { id: 'd4-doc-2', label: 'Comprovativo de pagamento de propina/matricula', ok: true },
+      { id: 'd4-doc-3', label: 'Formulário D4 preenchido', ok: true },
+      { id: 'd4-doc-4', label: 'Passaporte + 2 cópias', ok: true },
+      { id: 'd4-doc-5', label: 'Extrato de subsistência (mínimo €820/mês de permanência)', ok: false },
+      { id: 'd4-doc-6', label: 'PB4 / Seguro saúde', ok: false },
+      { id: 'd4-doc-7', label: 'Certidão de antecedentes criminais apostilada', ok: false },
     ],
     etapas: [
       { id: 'd4-1', titulo: 'Candidatura & Aceite da Faculdade', descricao: 'Obtenção do certificado oficial de admissão.', status: 'Concluído', data: 'Jun 2026' },
@@ -326,13 +326,13 @@ export const CONFIGS_VISTO: ConfigVisto[] = [
       'Seguro médico privado sem copagamento com cobertura ilimitada na Espanha',
     ],
     docsConsulado: [
-      { label: 'Formulário oficial de visto de estudos da Espanha', ok: true },
-      { label: 'Carta de Admissão da Universidade Espanhola', ok: true },
-      { label: 'Credencial UNEDasiss / Homologação de Notas', ok: false },
-      { label: 'Seguro Médico Privado sem franquia (mín. €30.000 ou ilimitado)', ok: false },
-      { label: 'Comprovante bancário (IPREM = €600/mês x 12 meses)', ok: false },
-      { label: 'Antecedentes criminais com Haia + tradução juramentada espanhol', ok: false },
-      { label: 'Atestado médico de boa saúde física/mental', ok: false },
+      { id: 'es-doc-1', label: 'Formulário oficial de visto de estudos da Espanha', ok: true },
+      { id: 'es-doc-2', label: 'Carta de Admissão da Universidade Espanhola', ok: true },
+      { id: 'es-doc-3', label: 'Credencial UNEDasiss / Homologação de Notas', ok: false },
+      { id: 'es-doc-4', label: 'Seguro Médico Privado sem franquia (mín. €30.000 ou ilimitado)', ok: false },
+      { id: 'es-doc-5', label: 'Comprovante bancário (IPREM = €600/mês x 12 meses)', ok: false },
+      { id: 'es-doc-6', label: 'Antecedentes criminais com Haia + tradução juramentada espanhol', ok: false },
+      { id: 'es-doc-7', label: 'Atestado médico de boa saúde física/mental', ok: false },
     ],
     etapas: [
       { id: 'es-1', titulo: 'Homologação UNEDasiss', descricao: 'Conversão de notas do ensino médio/graduação para o sistema espanhol.', status: 'Em Andamento', data: 'Ago 2026' },

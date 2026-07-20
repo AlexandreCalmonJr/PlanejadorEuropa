@@ -6,6 +6,7 @@ import { IconeMais, IconeLixeira } from '../components/Icons'
 import { BadgePais } from '../components/Badges'
 import { Modal, CampoTexto, CampoNumero, CampoSelect, CampoToggle, BotaoSubmit, useModal } from '../components/Modal'
 import { EducationDetailModal } from '../components/EducationDetailModal'
+import { useLocalStorage } from '../hooks/useLocalStorage'
 
 interface EducationBoardProps {
   faculdades: Faculdade[]
@@ -15,6 +16,8 @@ interface EducationBoardProps {
 const CORES_CARD = ['#0284C7', '#14B8A6', '#8B5CF6', '#F59E0B', '#EC4899', '#10B981', '#F97316', '#E11D48', '#6366F1']
 
 export function EducationBoard({ faculdades, setFaculdades }: EducationBoardProps) {
+  const [pessoas, setPessoas] = useLocalStorage<string[]>('ep_vistos_pessoas', ['Alexandre', 'Andressa'])
+  const [filtroPessoa, setFiltroPessoa] = useLocalStorage<string>('ep_faculdade_filtro_pessoa', 'TODOS')
   const [arrastando, setArrastando] = useState<string | null>(null)
   const sobreRef = useRef<ColunaFaculdade | null>(null)
   const [filtroPais, setFiltroPais] = useState<PaisDestino | 'TODOS'>('TODOS')
@@ -27,14 +30,19 @@ export function EducationBoard({ faculdades, setFaculdades }: EducationBoardProp
   const [novoTipo, setNovoTipo] = useState<Faculdade['tipoCurso']>('Licenciatura')
   const [novaCidade, setNovaCidade] = useState('')
   const [novoPais, setNovoPais] = useState<PaisDestino>('PT')
+  const [novoResponsavel, setNovoResponsavel] = useState<string>('Alexandre')
   const [novaPropina, setNovaPropina] = useState(3000)
   const [novaMatricula, setNovaMatricula] = useState(25)
   const [novaTaxa, setNovaTaxa] = useState(30)
   const [novoAceitaDiploma, setNovoAceitaDiploma] = useState(true)
 
-  const faculdadesFiltradas = filtroPais === 'TODOS'
+  const faculdadesFiltradasPorPais = filtroPais === 'TODOS'
     ? faculdades
     : faculdades.filter(f => f.pais === filtroPais)
+
+  const faculdadesFiltradas = filtroPessoa === 'TODOS'
+    ? faculdadesFiltradasPorPais
+    : faculdadesFiltradasPorPais.filter(f => (f.responsavel || 'Ambos') === filtroPessoa || (f.responsavel || 'Ambos') === 'Ambos')
 
   const handleDragStart = (id: string) => setArrastando(id)
   const handleDragEnd = () => {
@@ -56,6 +64,7 @@ export function EducationBoard({ faculdades, setFaculdades }: EducationBoardProp
       area: 'Tecnologia',
       cidade: novaCidade,
       pais: novoPais,
+      responsavel: novoResponsavel,
       taxaCandidaturaEur: novaTaxa,
       matriculaEur: novaMatricula,
       propinaAnualEur: novaPropina,
@@ -83,41 +92,97 @@ export function EducationBoard({ faculdades, setFaculdades }: EducationBoardProp
     if (faculdadeSelecionada?.id === id) setFaculdadeSelecionada(null)
   }
 
-  const totalPT = faculdades.filter(f => f.pais === 'PT').length
-  const totalES = faculdades.filter(f => f.pais === 'ES').length
+  const totalPT = faculdadesFiltradas.filter(f => f.pais === 'PT').length
+  const totalES = faculdadesFiltradas.filter(f => f.pais === 'ES').length
 
   return (
     <div className="p-6 md:p-8 pb-24 md:pb-8">
+      {/* Cabecalho */}
       <div className="mb-6 flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-100">Faculdades</h1>
+          <h1 className="text-2xl font-semibold text-slate-100 flex items-center gap-2">
+            <span>Faculdades & Candidaturas</span>
+            {filtroPessoa !== 'TODOS' && (
+              <span className="text-xs px-2.5 py-0.5 rounded-full bg-violet-500/20 text-violet-300 border border-violet-500/30 font-bold">
+                👤 {filtroPessoa}
+              </span>
+            )}
+          </h1>
           <p className="text-slate-400 text-sm mt-1">
-            Kanban de candidaturas universitárias · Clique para ver detalhes completos e anexos
+            Kanban de candidaturas universitárias por estudante · Clique para detalhes e anexos
           </p>
         </div>
         <button
           onClick={modalNovo.abrir}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-violet-400 bg-violet-500/10 border border-violet-500/20 hover:bg-violet-500/20 transition-all"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-violet-400 bg-violet-500/10 border border-violet-500/20 hover:bg-violet-500/20 transition-all shadow-sm"
         >
           <IconeMais /> Nova Faculdade
         </button>
       </div>
 
-      {/* Filtro por país */}
-      <div className="flex items-center gap-2 mb-6">
-        {(['TODOS', 'PT', 'ES'] as const).map(p => (
+      {/* Painel de Filtros (Estudante & País) */}
+      <div className="mb-6 space-y-3 bg-slate-900/60 p-3 rounded-2xl border border-slate-800">
+        {/* Filtro por Requerente / Estudante */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-xs font-semibold text-slate-400 pl-1 uppercase tracking-wider text-[11px]">Estudante:</span>
           <button
-            key={p}
-            onClick={() => setFiltroPais(p)}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 ${
-              filtroPais === p
-                ? 'bg-violet-500 text-white shadow-sm'
-                : 'bg-slate-900 text-slate-400 border border-slate-800 hover:text-slate-200'
+            onClick={() => setFiltroPessoa('TODOS')}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              filtroPessoa === 'TODOS'
+                ? 'bg-violet-500 text-white shadow-md'
+                : 'text-slate-400 hover:text-slate-200 bg-slate-900 border border-slate-800'
             }`}
           >
-            {p === 'TODOS' ? '🌐 Todos' : p === 'PT' ? `🇵🇹 Portugal (${totalPT})` : `🇪🇸 Espanha (${totalES})`}
+            🌐 Todos os Estudantes
           </button>
-        ))}
+          {pessoas.map(p => (
+            <button
+              key={p}
+              onClick={() => setFiltroPessoa(p)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                filtroPessoa === p
+                  ? 'bg-violet-500 text-white shadow-md scale-105'
+                  : 'text-slate-400 hover:text-slate-200 bg-slate-900 border border-slate-800'
+              }`}
+            >
+              <span>👤</span>
+              <span>{p}</span>
+            </button>
+          ))}
+          <button
+            onClick={() => {
+              const nome = prompt('Digite o nome do estudante / pessoa:')
+              if (nome && nome.trim()) {
+                const limpo = nome.trim()
+                if (!pessoas.includes(limpo)) {
+                  setPessoas(prev => [...prev, limpo])
+                }
+                setFiltroPessoa(limpo)
+              }
+            }}
+            className="px-2.5 py-1.5 rounded-xl text-xs font-medium text-violet-400 bg-violet-500/10 border border-violet-500/20 hover:bg-violet-500/20 transition-all flex items-center gap-1"
+          >
+            <span>+</span> Nova Pessoa
+          </button>
+        </div>
+
+        {/* Filtro por País */}
+        <div className="flex items-center gap-2 flex-wrap border-t border-slate-800/80 pt-2.5">
+          <span className="text-xs font-semibold text-slate-400 pl-1 uppercase tracking-wider text-[11px]">Destino:</span>
+          {(['TODOS', 'PT', 'ES'] as const).map(p => (
+            <button
+              key={p}
+              onClick={() => setFiltroPais(p)}
+              className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${
+                filtroPais === p
+                  ? 'bg-slate-700 text-slate-100 font-bold border border-slate-600'
+                  : 'text-slate-400 hover:text-slate-200 bg-slate-950/60 border border-slate-800/80'
+              }`}
+            >
+              {p === 'TODOS' ? '🌐 Todos os Países' : p === 'PT' ? `🇵🇹 Portugal (${totalPT})` : `🇪🇸 Espanha (${totalES})`}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Kanban */}
@@ -177,6 +242,10 @@ export function EducationBoard({ faculdades, setFaculdades }: EducationBoardProp
             { value: 'ES', label: '🇪🇸 Espanha' },
           ]} />
         </div>
+        <CampoSelect label="Estudante / Responsável" valor={novoResponsavel} onChange={v => setNovoResponsavel(v)} opcoes={[
+          ...pessoas.map(p => ({ value: p, label: `👤 ${p}` })),
+          { value: 'Ambos', label: '👥 Ambos' },
+        ]} />
         <CampoTexto label="Cidade" valor={novaCidade} onChange={setNovaCidade} placeholder="Ex: Coimbra" />
         <div className="grid grid-cols-3 gap-3">
           <CampoNumero label="Propina €/ano" valor={novaPropina} onChange={setNovaPropina} />

@@ -55,6 +55,62 @@ export function Overview({
   const logisticaConcluida = tarefasLogistica.filter(t => t.status === 'Concluído').length
   const totalLogistica = tarefasLogistica.length
 
+  // Proximos passos e prazos integrados de TODO o sistema
+  const prazosSistema = [
+    // 1. Etapas do visto em andamento ou pendentes com datas
+    ...etapasVisto
+      .filter(e => e.status !== 'Concluído')
+      .map(e => ({
+        id: `visto-${e.id}`,
+        label: e.titulo,
+        data: e.data || 'Em Andamento',
+        urgencia: (e.status === 'Em Andamento' ? 'alta' : 'media') as 'alta' | 'media' | 'baixa',
+        modulo: '🛂 Visto',
+        corModulo: 'bg-amber-500/10 text-amber-300 border-amber-500/20',
+      })),
+
+    // 2. Documentos em andamento ou bloqueados
+    ...documentos
+      .filter(d => d.status === 'Em Andamento' || (d.bloqueadoPor && d.bloqueadoPor.length > 0))
+      .map(d => {
+        const estaBloq = d.bloqueadoPor?.some(bid => {
+          const b = documentos.find(x => x.id === bid)
+          return b && b.status !== 'Concluído'
+        })
+        return {
+          id: `doc-${d.id}`,
+          label: d.nome,
+          data: estaBloq ? 'Trava Ativa' : d.status === 'Em Andamento' ? 'Em Andamento' : 'Pendente',
+          urgencia: (estaBloq ? 'alta' : 'media') as 'alta' | 'media' | 'baixa',
+          modulo: d.pessoa ? `📜 Doc (${d.pessoa})` : '📜 Burocracia',
+          corModulo: 'bg-sky-500/10 text-sky-300 border-sky-500/20',
+        }
+      }),
+
+    // 3. Tarefas de logistica pendentes/em andamento
+    ...tarefasLogistica
+      .filter(t => t.status !== 'Concluído')
+      .slice(0, 2)
+      .map(t => ({
+        id: `log-${t.id}`,
+        label: t.titulo,
+        data: t.dataConclusao || 'Chegada PT',
+        urgencia: 'media' as const,
+        modulo: '📦 Logística',
+        corModulo: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20',
+      })),
+
+    // 4. Prazos explícitos cadastrados
+    ...prazos.map((p, i) => ({
+      id: `prazo-exp-${i}`,
+      label: p.label,
+      data: p.data,
+      urgencia: p.urgencia,
+      modulo: '🗓 Meta',
+      corModulo: 'bg-violet-500/10 text-violet-300 border-violet-500/20',
+    }))
+  ]
+
   return (
     <div className="p-6 md:p-8 w-full pb-24 md:pb-8 space-y-6">
       <div>
@@ -148,22 +204,47 @@ export function Overview({
       </div>
 
       <div className="grid md:grid-cols-2 gap-4">
-        {/* Prazos */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-          <h2 className="text-xs font-semibold text-slate-400 mb-4 uppercase tracking-widest">Próximos Prazos</h2>
-          <div className="space-y-3">
-            {prazos.map((p, i) => (
-              <div key={i} className="flex items-center gap-4">
-                <div className={`w-2 h-2 rounded-full shrink-0 ${
-                  p.urgencia === 'alta' ? 'bg-red-500' : p.urgencia === 'media' ? 'bg-amber-500' : 'bg-teal-500'
-                }`} />
-                <span className="text-slate-200 text-sm flex-1">{p.label}</span>
-                <span className={`text-xs font-medium px-2.5 py-1 rounded-lg ${
-                  p.urgencia === 'alta' ? 'bg-red-950 text-red-400' : p.urgencia === 'media' ? 'bg-amber-950 text-amber-400' : 'bg-slate-800 text-slate-400'
-                }`}>{p.data}</span>
-              </div>
-            ))}
+        {/* Prazos & Proximos Passos Integrados */}
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                <span>Próximos Passos & Prazos</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-400 font-bold border border-sky-500/20">
+                  ⚡ Sincronizado
+                </span>
+              </h2>
+              <span className="text-xs text-slate-500">{prazosSistema.length} pendentes</span>
+            </div>
+
+            <div className="space-y-3 max-h-72 overflow-y-auto pr-1">
+              {prazosSistema.map(p => (
+                <div key={p.id} className="flex items-center justify-between gap-3 bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
+                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                    <div className={`w-2 h-2 rounded-full shrink-0 ${
+                      p.urgencia === 'alta' ? 'bg-red-500 animate-pulse' : p.urgencia === 'media' ? 'bg-amber-500' : 'bg-teal-500'
+                    }`} />
+                    <span className="text-slate-200 text-xs font-semibold truncate">{p.label}</span>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className={`text-[10px] px-2 py-0.5 rounded-md font-bold border ${p.corModulo}`}>
+                      {p.modulo}
+                    </span>
+                    <span className={`text-[11px] font-medium px-2 py-0.5 rounded-lg ${
+                      p.urgencia === 'alta' ? 'bg-red-950/80 text-red-400 border border-red-500/30' : p.urgencia === 'media' ? 'bg-amber-950/80 text-amber-400 border border-amber-500/30' : 'bg-slate-800 text-slate-400'
+                    }`}>
+                      {p.data}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
+
+          <p className="text-[11px] text-slate-500 mt-4 border-t border-slate-800/80 pt-2.5 text-center">
+            💡 Atualizações em Vistos, Documentos e Logística refletem automaticamente aqui.
+          </p>
         </div>
 
         {/* Status do visto */}

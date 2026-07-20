@@ -101,6 +101,7 @@ export interface Documento {
   status: StatusDoc
   bloqueadoPor?: string[]
   pais?: PaisDestino | 'AMBOS'
+  pessoa?: string
   observacoes?: string
   anexos?: AnexoDocumento[]
 }
@@ -144,6 +145,7 @@ export interface EtapaVisto {
 }
 
 export interface DocConsulado {
+  id: string
   label: string
   ok: boolean
 }

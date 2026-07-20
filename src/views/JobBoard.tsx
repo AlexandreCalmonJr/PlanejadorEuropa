@@ -3,8 +3,9 @@ import type { Vaga, ColunaKanban } from '../types'
 import { fmtK, gerarId } from '../helpers'
 import { COLUNAS_KANBAN, CORES_COLUNAS_KANBAN } from '../data'
 import { IconeMais, IconeLixeira } from '../components/Icons'
-import { Modal, CampoTexto, CampoNumero, CampoToggle, BotaoSubmit, useModal } from '../components/Modal'
+import { Modal, CampoTexto, CampoNumero, CampoSelect, CampoToggle, BotaoSubmit, useModal } from '../components/Modal'
 import { JobDetailModal } from '../components/JobDetailModal'
+import { useLocalStorage } from '../hooks/useLocalStorage'
 
 const CORES_CARD = ['#14B8A6', '#0284C7', '#8B5CF6', '#F59E0B', '#EC4899', '#10B981', '#F97316', '#E11D48', '#6366F1']
 
@@ -14,6 +15,8 @@ interface JobBoardProps {
 }
 
 export function JobBoard({ vagas, setVagas }: JobBoardProps) {
+  const [pessoas, setPessoas] = useLocalStorage<string[]>('ep_vistos_pessoas', ['Alexandre', 'Andressa'])
+  const [filtroPessoa, setFiltroPessoa] = useLocalStorage<string>('ep_jobs_filtro_pessoa', 'TODOS')
   const [arrastando, setArrastando] = useState<string | null>(null)
   const sobreRef = useRef<ColunaKanban | null>(null)
   const modalNovo = useModal()
@@ -26,6 +29,11 @@ export function JobBoard({ vagas, setVagas }: JobBoardProps) {
   const [novoSalarioMax, setNovoSalarioMax] = useState(45000)
   const [novoPatrocinio, setNovoPatrocinio] = useState(false)
   const [novaCidade, setNovaCidade] = useState('')
+  const [novoResponsavel, setNovoResponsavel] = useState<string>('Alexandre')
+
+  const vagasFiltradas = filtroPessoa === 'TODOS'
+    ? vagas
+    : vagas.filter(v => (v.responsavel || 'Ambos') === filtroPessoa || (v.responsavel || 'Ambos') === 'Ambos')
 
   const handleDragStart = (id: string) => setArrastando(id)
   const handleDragEnd = () => {
@@ -50,6 +58,7 @@ export function JobBoard({ vagas, setVagas }: JobBoardProps) {
       inicial: novaEmpresa[0]?.toUpperCase() ?? '?',
       cor,
       cidade: novaCidade,
+      responsavel: novoResponsavel,
       anexos: [],
     }
     setVagas(prev => [...prev, nova])
@@ -71,22 +80,77 @@ export function JobBoard({ vagas, setVagas }: JobBoardProps) {
 
   return (
     <div className="p-6 md:p-8 pb-24 md:pb-8">
-      <div className="mb-8 flex items-start justify-between gap-4 flex-wrap">
+      {/* Cabecalho */}
+      <div className="mb-6 flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-100">Quadro de Vagas</h1>
-          <p className="text-slate-400 text-sm mt-1">Acompanhe suas candidaturas · Clique em qualquer cartão para ver todos os detalhes e anexos</p>
+          <h1 className="text-2xl font-semibold text-slate-100 flex items-center gap-2">
+            <span>Quadro de Vagas & Emprego</span>
+            {filtroPessoa !== 'TODOS' && (
+              <span className="text-xs px-2.5 py-0.5 rounded-full bg-teal-500/20 text-teal-300 border border-teal-500/30 font-bold">
+                👤 {filtroPessoa}
+              </span>
+            )}
+          </h1>
+          <p className="text-slate-400 text-sm mt-1">Acompanhe suas candidaturas por candidato · Clique no cartão para detalhes</p>
         </div>
         <button
           onClick={modalNovo.abrir}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-teal-400 bg-teal-500/10 border border-teal-500/20 hover:bg-teal-500/20 transition-all"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-teal-400 bg-teal-500/10 border border-teal-500/20 hover:bg-teal-500/20 transition-all shadow-sm"
         >
           <IconeMais /> Nova Vaga
         </button>
       </div>
 
+      {/* Painel de Filtro por Candidato */}
+      <div className="mb-6 space-y-3 bg-slate-900/60 p-3 rounded-2xl border border-slate-800">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-xs font-semibold text-slate-400 pl-1 uppercase tracking-wider text-[11px]">Candidato:</span>
+          <button
+            onClick={() => setFiltroPessoa('TODOS')}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              filtroPessoa === 'TODOS'
+                ? 'bg-teal-500 text-slate-950 shadow-md'
+                : 'text-slate-400 hover:text-slate-200 bg-slate-900 border border-slate-800'
+            }`}
+          >
+            🌐 Todos os Candidatos
+          </button>
+          {pessoas.map(p => (
+            <button
+              key={p}
+              onClick={() => setFiltroPessoa(p)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                filtroPessoa === p
+                  ? 'bg-teal-500 text-slate-950 shadow-md scale-105'
+                  : 'text-slate-400 hover:text-slate-200 bg-slate-900 border border-slate-800'
+              }`}
+            >
+              <span>👤</span>
+              <span>{p}</span>
+            </button>
+          ))}
+          <button
+            onClick={() => {
+              const nome = prompt('Digite o nome do candidato / pessoa:')
+              if (nome && nome.trim()) {
+                const limpo = nome.trim()
+                if (!pessoas.includes(limpo)) {
+                  setPessoas(prev => [...prev, limpo])
+                }
+                setFiltroPessoa(limpo)
+              }
+            }}
+            className="px-2.5 py-1.5 rounded-xl text-xs font-medium text-teal-400 bg-teal-500/10 border border-teal-500/20 hover:bg-teal-500/20 transition-all flex items-center gap-1"
+          >
+            <span>+</span> Nova Pessoa
+          </button>
+        </div>
+      </div>
+
+      {/* Kanban */}
       <div className="flex gap-4 overflow-x-auto pb-4" style={{ minHeight: '60vh' }}>
         {COLUNAS_KANBAN.map(col => {
-          const colVagas = vagas.filter(v => v.coluna === col)
+          const colVagas = vagasFiltradas.filter(v => v.coluna === col)
           return (
             <div
               key={col}
@@ -128,6 +192,10 @@ export function JobBoard({ vagas, setVagas }: JobBoardProps) {
       <Modal aberto={modalNovo.aberto} onFechar={modalNovo.fechar} titulo="Nova Candidatura">
         <CampoTexto label="Empresa" valor={novaEmpresa} onChange={setNovaEmpresa} placeholder="Ex: Critical TechWorks" />
         <CampoTexto label="Cargo" valor={novoCargo} onChange={setNovoCargo} placeholder="Ex: Desenvolvedor Full Stack" />
+        <CampoSelect label="Candidato / Responsável" valor={novoResponsavel} onChange={v => setNovoResponsavel(v)} opcoes={[
+          ...pessoas.map(p => ({ value: p, label: `👤 ${p}` })),
+          { value: 'Ambos', label: '👥 Ambos' },
+        ]} />
         <CampoTexto label="Cidade" valor={novaCidade} onChange={setNovaCidade} placeholder="Ex: Coimbra" />
         <div className="grid grid-cols-2 gap-3">
           <CampoNumero label="Salário Mín (€/ano)" valor={novoSalarioMin} onChange={setNovoSalarioMin} />
