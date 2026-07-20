@@ -30,14 +30,14 @@ export default function App() {
   })
   const [view, setView] = useLocalStorage<View>('ep_view', 'overview')
 
-  // Estado persistido em localStorage
-  const [vagas, setVagas] = useLocalStorage<Vaga[]>('ep_vagas', VAGAS_INICIAIS)
-  const [faculdades, setFaculdades] = useLocalStorage<Faculdade[]>('ep_faculdades', FACULDADES_INICIAIS)
-  const [docs, setDocs] = useLocalStorage<Documento[]>('ep_docs', DOCUMENTOS_INICIAIS)
-  const [itensFinanceiros, setItensFinanceiros] = useLocalStorage<ItemFinanceiro[]>('ep_financas', ITENS_FINANCEIROS_INICIAIS)
-  const [etapasVisto, setEtapasVisto] = useLocalStorage<EtapaVisto[]>('ep_etapas_visto', ETAPAS_VISTO_INICIAIS)
-  const [docsConsulado, setDocsConsulado] = useLocalStorage<DocConsulado[]>('ep_docs_consulado', DOCS_CONSULADO_INICIAIS)
-  const [tarefasLogistica, setTarefasLogistica] = useLocalStorage<TarefaLogistica[]>('ep_logistica', TAREFAS_LOGISTICA_INICIAIS)
+  // Estado persistido em localStorage (usa arrays vazios se Supabase estiver ativo para evitar dados falsos de teste)
+  const [vagas, setVagas] = useLocalStorage<Vaga[]>('ep_vagas', isSupabaseConfigured ? [] : VAGAS_INICIAIS)
+  const [faculdades, setFaculdades] = useLocalStorage<Faculdade[]>('ep_faculdades', isSupabaseConfigured ? [] : FACULDADES_INICIAIS)
+  const [docs, setDocs] = useLocalStorage<Documento[]>('ep_docs', isSupabaseConfigured ? [] : DOCUMENTOS_INICIAIS)
+  const [itensFinanceiros, setItensFinanceiros] = useLocalStorage<ItemFinanceiro[]>('ep_financas', isSupabaseConfigured ? [] : ITENS_FINANCEIROS_INICIAIS)
+  const [etapasVisto, setEtapasVisto] = useLocalStorage<EtapaVisto[]>('ep_etapas_visto', isSupabaseConfigured ? [] : ETAPAS_VISTO_INICIAIS)
+  const [docsConsulado, setDocsConsulado] = useLocalStorage<DocConsulado[]>('ep_docs_consulado', isSupabaseConfigured ? [] : DOCS_CONSULADO_INICIAIS)
+  const [tarefasLogistica, setTarefasLogistica] = useLocalStorage<TarefaLogistica[]>('ep_logistica', isSupabaseConfigured ? [] : TAREFAS_LOGISTICA_INICIAIS)
   const [voos, setVoos] = useLocalStorage<Voo[]>('ep_voos', [])
 
   // Monitora login/logout via Supabase Auth (ex: Google OAuth)
@@ -60,24 +60,33 @@ export default function App() {
     return () => subscription.unsubscribe()
   }, [])
 
-  // Carrega dados do Supabase se configurado
+  // Carrega todos os dados do Supabase se configurado
   useEffect(() => {
     if (!isSupabaseConfigured) return
     async function carregarSupabase() {
       const v = await carregarDoSupabase<Vaga>('vagas')
-      if (v && v.length > 0) setVagas(v)
+      if (v !== null) setVagas(v)
 
       const f = await carregarDoSupabase<Faculdade>('faculdades')
-      if (f && f.length > 0) setFaculdades(f)
+      if (f !== null) setFaculdades(f)
 
       const d = await carregarDoSupabase<Documento>('documentos')
-      if (d && d.length > 0) setDocs(d)
+      if (d !== null) setDocs(d)
 
       const fin = await carregarDoSupabase<ItemFinanceiro>('itens_financeiros')
-      if (fin && fin.length > 0) setItensFinanceiros(fin)
+      if (fin !== null) setItensFinanceiros(fin)
+
+      const ev = await carregarDoSupabase<EtapaVisto>('etapas_visto')
+      if (ev !== null) setEtapasVisto(ev)
+
+      const dc = await carregarDoSupabase<DocConsulado>('docs_consulado')
+      if (dc !== null) setDocsConsulado(dc)
+
+      const tl = await carregarDoSupabase<TarefaLogistica>('tarefas_logistica')
+      if (tl !== null) setTarefasLogistica(tl)
 
       const voosData = await carregarDoSupabase<Voo>('voos')
-      if (voosData && voosData.length > 0) setVoos(voosData)
+      if (voosData !== null) setVoos(voosData)
     }
     carregarSupabase()
   }, [])
