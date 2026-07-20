@@ -108,7 +108,7 @@ export async function deletarItemSupabase(tabela: string, id: string): Promise<b
  */
 export async function loginComGoogle(): Promise<boolean> {
   if (!supabase) {
-    alert('Supabase nao configurado. Preencha VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY para usar Login com Google.')
+    alert('Supabase não configurado. Preencha VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY no seu .env para usar Login com Google.')
     return false
   }
   try {
@@ -119,12 +119,16 @@ export async function loginComGoogle(): Promise<boolean> {
       },
     })
     if (error) {
-      alert(`Erro no Login Google: ${error.message}`)
+      if (error.message.toLowerCase().includes('not enabled') || error.message.toLowerCase().includes('validation_failed')) {
+        alert('⚠️ Login do Google não ativado no Supabase.\n\nPara ativar:\n1. Acesse o Supabase Dashboard -> Authentication -> Providers\n2. Habilite a opção "Google"\n3. Preencha o Client ID e Client Secret do Google Cloud Console.')
+      } else {
+        alert(`Erro no Login Google: ${error.message}`)
+      }
       return false
     }
     return true
-  } catch (err) {
-    console.error('Erro ao conectar com Google Auth:', err)
+  } catch (err: any) {
+    alert(`Erro ao conectar com Google: ${err?.message || err}`)
     return false
   }
 }

@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import type { View } from '../types'
 import { IconeGrade, IconeKanban, IconeArquivo, IconeCarteira, IconePassaporte, IconeGraduacao, IconeLogistica, IconeVoo, IconeDemo } from './Icons'
 import { useLocalStorage } from '../hooks/useLocalStorage'
@@ -23,6 +23,9 @@ const ITENS_NAV: ItemNav[] = [
   { id: 'demo',       label: 'Modo Demo',    icon: IconeDemo },
 ]
 
+// Abas de acesso rapido para a barra inferior no mobile
+const ABAS_ATALHO_MOBILE: View[] = ['overview', 'kanban', 'documents', 'visto']
+
 export function Sidebar({
   ativa,
   onNav,
@@ -41,6 +44,7 @@ export function Sidebar({
   etapasVistoPendentesCount?: number
 }) {
   const [recuada, setRecuada] = useLocalStorage<boolean>('ep_sidebar_recuada', false)
+  const [menuMobileAberto, setMenuMobileAberto] = useState(false)
 
   const getBadgeValue = (key?: string) => {
     if (key === 'vagas') return vagasCount > 0 ? String(vagasCount) : null
@@ -50,8 +54,34 @@ export function Sidebar({
     return null
   }
 
+  const itemAtivo = ITENS_NAV.find(i => i.id === ativa)
+
   return (
     <>
+      {/* Top Mobile Bar (Header no celular com botao de Hambúrguer) */}
+      <header className="md:hidden w-full sticky top-0 z-40 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 px-4 py-3 flex items-center justify-between shrink-0">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl flex items-center justify-center text-white font-bold text-xs shadow-md" style={{ background: 'linear-gradient(135deg, #14B8A6, #0284C7)' }}>
+            EP
+          </div>
+          <div>
+            <p className="text-slate-100 font-bold text-sm leading-none">EuroPlanner</p>
+            <p className="text-teal-400 text-[11px] font-semibold mt-1 flex items-center gap-1">
+              <span>●</span> {itemAtivo?.label || 'Resumo'}
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setMenuMobileAberto(true)}
+          className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/80 transition-all text-xs font-bold"
+        >
+          <span className="text-base leading-none">☰</span>
+          <span>Menu</span>
+        </button>
+      </header>
+
       {/* Desktop Sidebar */}
       <aside className={`hidden md:flex flex-col shrink-0 bg-slate-900 border-r border-slate-800 h-screen sticky top-0 transition-all duration-300 ${recuada ? 'w-16' : 'w-60'}`}>
         {/* Header com Botao de Recuar */}
@@ -138,32 +168,123 @@ export function Sidebar({
         </div>
       </aside>
 
-      {/* Mobile bottom nav */}
+      {/* Mobile Streamlined Bottom Nav (Apenas 4 atalhos + Botao Hambúrguer) */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 flex items-center">
-        {ITENS_NAV.map(({ id, label, icon: Icone }) => {
+        {ABAS_ATALHO_MOBILE.map(id => {
+          const item = ITENS_NAV.find(i => i.id === id)!
+          const Icone = item.icon
           const ativo = ativa === id
           return (
             <button
               key={id}
-              onClick={() => onNav(id as View)}
-              className={`flex-1 flex flex-col items-center gap-0.5 py-2 text-[9px] font-medium transition-colors ${
-                ativo ? 'text-teal-400' : 'text-slate-500'
+              onClick={() => onNav(id)}
+              className={`flex-1 flex flex-col items-center gap-0.5 py-2 text-[10px] font-semibold transition-all ${
+                ativo ? 'text-teal-400 font-bold scale-105' : 'text-slate-400 hover:text-slate-200'
               }`}
             >
-              <Icone size={16} ativo={ativo} />
-              {label}
+              <Icone size={18} ativo={ativo} />
+              <span>{item.label}</span>
             </button>
           )
         })}
+
+        {/* Botao de Menu Hambúrguer na Barra Inferior */}
         <button
-          onClick={onSair}
-          title="Sair"
-          className="flex-1 flex flex-col items-center gap-0.5 py-2 text-[9px] font-medium text-red-400 hover:text-red-300 transition-colors"
+          onClick={() => setMenuMobileAberto(true)}
+          className={`flex-1 flex flex-col items-center gap-0.5 py-2 text-[10px] font-semibold transition-all ${
+            menuMobileAberto ? 'text-teal-400 font-bold' : 'text-slate-400 hover:text-slate-200'
+          }`}
         >
-          <span className="text-sm">🚪</span>
-          Sair
+          <span className="text-lg leading-none">☰</span>
+          <span>Mais</span>
         </button>
       </nav>
+
+      {/* Mobile Drawer (Menu Hambúrguer Completo no Celular) */}
+      {menuMobileAberto && (
+        <div className="md:hidden fixed inset-0 z-50 flex flex-col justify-end bg-slate-950/80 backdrop-blur-sm animate-fade-in">
+          {/* Overlay de fechar ao clicar fora */}
+          <div className="flex-1" onClick={() => setMenuMobileAberto(false)} />
+
+          {/* Painel do Menu Hambúrguer */}
+          <div className="bg-slate-900 border-t border-slate-800 rounded-t-3xl p-5 space-y-4 max-h-[85vh] overflow-y-auto shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-md" style={{ background: 'linear-gradient(135deg, #14B8A6, #0284C7)' }}>
+                  EP
+                </div>
+                <div>
+                  <h3 className="text-slate-100 font-bold text-base">Menu EuroPlanner</h3>
+                  <p className="text-slate-500 text-xs">Todas as ferramentas de imigração</p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setMenuMobileAberto(false)}
+                className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 flex items-center justify-center text-sm font-bold transition-all"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Grid de Links do Menu */}
+            <div className="grid grid-cols-2 gap-2">
+              {ITENS_NAV.map(({ id, label, icon: Icone, badgeKey, badgeColor }) => {
+                const ativo = ativa === id
+                const badge = getBadgeValue(badgeKey)
+                return (
+                  <button
+                    key={id}
+                    onClick={() => {
+                      onNav(id as View)
+                      setMenuMobileAberto(false)
+                    }}
+                    className={`flex items-center gap-3 p-3 rounded-2xl border text-xs font-semibold transition-all text-left ${
+                      ativo
+                        ? 'bg-teal-500/20 text-teal-300 border-teal-500/40 shadow-md font-bold'
+                        : 'bg-slate-950/60 border-slate-800/80 text-slate-300 hover:bg-slate-800/60 hover:text-slate-100'
+                    }`}
+                  >
+                    <Icone size={18} ativo={ativo} />
+                    <span className="truncate flex-1">{label}</span>
+                    {badge && (
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-bold ${badgeColor ?? 'bg-slate-700 text-slate-300'}`}>
+                        {badge}
+                      </span>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+
+            {/* Perfil & Sair */}
+            <div className="pt-3 border-t border-slate-800 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 shadow-sm" style={{ background: 'linear-gradient(135deg, #14B8A6, #0284C7)' }}>
+                  <span className="text-white text-xs font-semibold">AC</span>
+                </div>
+                <div className="min-w-0">
+                  <p className="text-slate-200 text-xs font-semibold truncate">Alexandre Calmon</p>
+                  <p className="text-slate-500 text-[10px] truncate">Salvador → Coimbra</p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuMobileAberto(false)
+                  onSair()
+                }}
+                className="px-3 py-2 rounded-xl text-xs font-bold text-red-400 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 transition-all flex items-center gap-1.5"
+              >
+                <span>🚪</span> Sair
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }
+

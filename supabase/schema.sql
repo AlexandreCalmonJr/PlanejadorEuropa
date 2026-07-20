@@ -68,6 +68,7 @@ CREATE TABLE IF NOT EXISTS public.documentos (
   status TEXT NOT NULL CHECK (status IN ('Concluído', 'Em Andamento', 'Pendente', 'Bloqueado')),
   bloqueado_por TEXT[],
   pais VARCHAR(10) CHECK (pais IN ('PT', 'ES', 'AMBOS')),
+  pessoa TEXT DEFAULT 'Ambos',
   observacoes TEXT,
   anexos JSONB DEFAULT '[]'::jsonb,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -103,6 +104,7 @@ CREATE TABLE IF NOT EXISTS public.etapas_visto (
   descricao TEXT NOT NULL,
   status TEXT NOT NULL CHECK (status IN ('Concluído', 'Em Andamento', 'Pendente')),
   data TEXT,
+  pessoa TEXT DEFAULT 'Alexandre',
   obs TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()

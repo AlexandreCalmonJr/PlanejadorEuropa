@@ -108,7 +108,7 @@ export default function App() {
   }
 
   return (
-    <div className="flex h-screen bg-slate-950 text-slate-100 overflow-hidden font-sans">
+    <div className="flex flex-col md:flex-row h-screen bg-slate-950 text-slate-100 overflow-hidden font-sans">
       <Sidebar
         ativa={view}
         onNav={setView}
@@ -118,7 +118,7 @@ export default function App() {
         docsCount={docs.length}
         etapasVistoPendentesCount={etapasVisto.filter(e => e.status !== 'Concluído').length}
       />
-      <main className="flex-1 overflow-y-auto bg-slate-950">
+      <main className="flex-1 overflow-y-auto bg-slate-950 pb-20 md:pb-0">
         {view === 'overview'  && (
           <Overview
             itensFinanceiros={itensFinanceiros}
