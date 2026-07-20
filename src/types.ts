@@ -9,7 +9,7 @@ export interface AnexoDocumento {
 }
 
 // ─── Views ────────────────────────────────────────────────────────────────────
-export type View = 'overview' | 'kanban' | 'documents' | 'finance' | 'visto' | 'educacao' | 'logistica' | 'voos'
+export type View = 'overview' | 'kanban' | 'documents' | 'finance' | 'visto' | 'educacao' | 'logistica' | 'voos' | 'demo'
 
 // ─── Voos & Passagens Aereas ──────────────────────────────────────────────────
 export interface Voo {

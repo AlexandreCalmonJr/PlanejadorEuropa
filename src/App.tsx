@@ -23,6 +23,7 @@ import { FinanceManager } from './views/FinanceManager'
 import { VisaTracker } from './views/VisaTracker'
 import { LogisticsTracker } from './views/LogisticsTracker'
 import { FlightPlanner } from './views/FlightPlanner'
+import { DemoSeeder } from './views/DemoSeeder'
 
 export default function App() {
   const [autenticado, setAutenticado] = useState<boolean>(() => {
@@ -137,6 +138,19 @@ export default function App() {
         {view === 'visto'     && <VisaTracker etapas={etapasVisto} setEtapas={setEtapasVisto} docsConsulado={docsConsulado} setDocsConsulado={setDocsConsulado} />}
         {view === 'logistica' && <LogisticsTracker tarefas={tarefasLogistica} setTarefas={setTarefasLogistica} />}
         {view === 'voos'      && <FlightPlanner voos={voos} setVoos={setVoos} />}
+        {view === 'demo'      && (
+          <DemoSeeder
+            setVagas={setVagas}
+            setFaculdades={setFaculdades}
+            setDocs={setDocs}
+            setItensFinanceiros={setItensFinanceiros}
+            setEtapasVisto={setEtapasVisto}
+            setDocsConsulado={setDocsConsulado}
+            setTarefasLogistica={setTarefasLogistica}
+            setVoos={setVoos}
+            onNavegarResumo={() => setView('overview')}
+          />
+        )}
       </main>
     </div>
   )
