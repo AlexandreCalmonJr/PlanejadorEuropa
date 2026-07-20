@@ -148,38 +148,65 @@ export function EducationDetailModal({ faculdade, onFechar, onSalvar, onRemover 
           </div>
         </div>
 
-        {/* Requisitos & Vantagens */}
+        {/* Requisitos & Vantagens Editaveis */}
         <div>
-          <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider block mb-2">
-            Critérios de Admissão & Facilidades
-          </label>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-            <div className={`p-3 rounded-xl border text-xs flex flex-col justify-between ${
-              formData.aceitaEnem
-                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
-                : 'bg-slate-900 border-slate-800 text-slate-500'
-            }`}>
-              <span className="font-bold">ACEITA ENEM?</span>
-              <span className="mt-1 font-semibold">{formData.aceitaEnem ? '✓ SIM (Nota do ENEM)' : '✕ Não aceita ENEM'}</span>
-            </div>
+          <div className="flex items-center justify-between mb-2">
+            <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider block">
+              Critérios de Admissão & Facilidades
+            </label>
+            <span className="text-[11px] text-violet-400 font-medium">Clique nos quadros para ativar/desativar</span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                const at = { ...formData, aceitaEnem: !formData.aceitaEnem }
+                setFormData(at)
+                onSalvar(at)
+              }}
+              className={`p-3.5 rounded-xl border text-xs flex flex-col justify-between text-left transition-all duration-150 cursor-pointer hover:scale-[1.02] shadow-sm ${
+                formData.aceitaEnem
+                  ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300 shadow-emerald-500/5'
+                  : 'bg-slate-900/90 border-slate-800 text-slate-500 hover:border-slate-700'
+              }`}
+            >
+              <span className="font-bold tracking-wider">ACEITA ENEM?</span>
+              <span className="mt-2 text-xs font-bold">{formData.aceitaEnem ? '✓ Aceita Nota do ENEM' : '✕ Não aceita ENEM'}</span>
+            </button>
 
-            <div className={`p-3 rounded-xl border text-xs flex flex-col justify-between ${
-              formData.aceitaDiplomaBr
-                ? 'bg-sky-500/10 border-sky-500/30 text-sky-300'
-                : 'bg-slate-900 border-slate-800 text-slate-500'
-            }`}>
-              <span className="font-bold">DIPLOMA BRASILEIRO?</span>
-              <span className="mt-1 font-semibold">{formData.aceitaDiplomaBr ? '✓ Aceita Graduação BR' : '✕ Requer Equivalência'}</span>
-            </div>
+            <button
+              type="button"
+              onClick={() => {
+                const at = { ...formData, aceitaDiplomaBr: !formData.aceitaDiplomaBr }
+                setFormData(at)
+                onSalvar(at)
+              }}
+              className={`p-3.5 rounded-xl border text-xs flex flex-col justify-between text-left transition-all duration-150 cursor-pointer hover:scale-[1.02] shadow-sm ${
+                formData.aceitaDiplomaBr
+                  ? 'bg-sky-500/15 border-sky-500/40 text-sky-300 shadow-sky-500/5'
+                  : 'bg-slate-900/90 border-slate-800 text-slate-500 hover:border-slate-700'
+              }`}
+            >
+              <span className="font-bold tracking-wider">DIPLOMA BRASILEIRO?</span>
+              <span className="mt-2 text-xs font-bold">{formData.aceitaDiplomaBr ? '✓ Aceita Graduação BR' : '✕ Requer Equivalência'}</span>
+            </button>
 
-            <div className={`p-3 rounded-xl border text-xs flex flex-col justify-between ${
-              formData.bolsaCplp
-                ? 'bg-violet-500/10 border-violet-500/30 text-violet-300'
-                : 'bg-slate-900 border-slate-800 text-slate-500'
-            }`}>
-              <span className="font-bold">DESCONTO CPLP?</span>
-              <span className="mt-1 font-semibold">{formData.bolsaCplp ? '✓ Tarifa Reduzida CPLP' : '✕ Sem Desconto CPLP'}</span>
-            </div>
+            <button
+              type="button"
+              onClick={() => {
+                const at = { ...formData, bolsaCplp: !formData.bolsaCplp }
+                setFormData(at)
+                onSalvar(at)
+              }}
+              className={`p-3.5 rounded-xl border text-xs flex flex-col justify-between text-left transition-all duration-150 cursor-pointer hover:scale-[1.02] shadow-sm ${
+                formData.bolsaCplp
+                  ? 'bg-violet-500/15 border-violet-500/40 text-violet-300 shadow-violet-500/5'
+                  : 'bg-slate-900/90 border-slate-800 text-slate-500 hover:border-slate-700'
+              }`}
+            >
+              <span className="font-bold tracking-wider">DESCONTO CPLP?</span>
+              <span className="mt-2 text-xs font-bold">{formData.bolsaCplp ? '✓ Tarifa Reduzida CPLP' : '✕ Sem Desconto CPLP'}</span>
+            </button>
           </div>
         </div>
 
