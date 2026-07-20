@@ -1,4 +1,5 @@
-import type { View } from './types'
+import { useState, useEffect } from 'react'
+import type { View, Vaga, Faculdade, Documento, ItemFinanceiro, EtapaVisto, DocConsulado, TarefaLogistica } from './types'
 import { useLocalStorage } from './hooks/useLocalStorage'
 import {
   VAGAS_INICIAIS,
@@ -12,6 +13,8 @@ import {
 } from './data'
 
 import { Sidebar } from './components/Sidebar'
+import { AuthLockScreen } from './components/AuthLockScreen'
+import { carregarDoSupabase, isSupabaseConfigured } from './lib/supabase'
 import { Overview } from './views/Overview'
 import { JobBoard } from './views/JobBoard'
 import { EducationBoard } from './views/EducationBoard'
@@ -21,16 +24,47 @@ import { VisaTracker } from './views/VisaTracker'
 import { LogisticsTracker } from './views/LogisticsTracker'
 
 export default function App() {
+  const [autenticado, setAutenticado] = useState<boolean>(() => {
+    return sessionStorage.getItem('ep_autenticado') === 'true'
+  })
   const [view, setView] = useLocalStorage<View>('ep_view', 'overview')
 
   // Estado persistido em localStorage
-  const [vagas, setVagas] = useLocalStorage('ep_vagas', VAGAS_INICIAIS)
-  const [faculdades, setFaculdades] = useLocalStorage('ep_faculdades', FACULDADES_INICIAIS)
-  const [docs, setDocs] = useLocalStorage('ep_docs', DOCUMENTOS_INICIAIS)
-  const [itensFinanceiros, setItensFinanceiros] = useLocalStorage('ep_financas', ITENS_FINANCEIROS_INICIAIS)
-  const [etapasVisto, setEtapasVisto] = useLocalStorage('ep_etapas_visto', ETAPAS_VISTO_INICIAIS)
-  const [docsConsulado, setDocsConsulado] = useLocalStorage('ep_docs_consulado', DOCS_CONSULADO_INICIAIS)
-  const [tarefasLogistica, setTarefasLogistica] = useLocalStorage('ep_logistica', TAREFAS_LOGISTICA_INICIAIS)
+  const [vagas, setVagas] = useLocalStorage<Vaga[]>('ep_vagas', VAGAS_INICIAIS)
+  const [faculdades, setFaculdades] = useLocalStorage<Faculdade[]>('ep_faculdades', FACULDADES_INICIAIS)
+  const [docs, setDocs] = useLocalStorage<Documento[]>('ep_docs', DOCUMENTOS_INICIAIS)
+  const [itensFinanceiros, setItensFinanceiros] = useLocalStorage<ItemFinanceiro[]>('ep_financas', ITENS_FINANCEIROS_INICIAIS)
+  const [etapasVisto, setEtapasVisto] = useLocalStorage<EtapaVisto[]>('ep_etapas_visto', ETAPAS_VISTO_INICIAIS)
+  const [docsConsulado, setDocsConsulado] = useLocalStorage<DocConsulado[]>('ep_docs_consulado', DOCS_CONSULADO_INICIAIS)
+  const [tarefasLogistica, setTarefasLogistica] = useLocalStorage<TarefaLogistica[]>('ep_logistica', TAREFAS_LOGISTICA_INICIAIS)
+
+  // Carrega dados do Supabase se configurado
+  useEffect(() => {
+    if (!isSupabaseConfigured) return
+    async function carregarSupabase() {
+      const v = await carregarDoSupabase<Vaga>('vagas')
+      if (v && v.length > 0) setVagas(v)
+
+      const f = await carregarDoSupabase<Faculdade>('faculdades')
+      if (f && f.length > 0) setFaculdades(f)
+
+      const d = await carregarDoSupabase<Documento>('documentos')
+      if (d && d.length > 0) setDocs(d)
+
+      const fin = await carregarDoSupabase<ItemFinanceiro>('itens_financeiros')
+      if (fin && fin.length > 0) setItensFinanceiros(fin)
+    }
+    carregarSupabase()
+  }, [])
+
+  const handleAutenticado = () => {
+    sessionStorage.setItem('ep_autenticado', 'true')
+    setAutenticado(true)
+  }
+
+  if (!autenticado) {
+    return <AuthLockScreen onAutenticado={handleAutenticado} />
+  }
 
   return (
     <div className="flex h-screen bg-slate-950 text-slate-100 overflow-hidden font-sans">
