@@ -1,0 +1,10 @@
+{
+  "description": "Streamline your immigration journey from Brazil to Portugal with a sleek dashboard that tracks finances, job applications, and essential documents.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
