@@ -54,6 +54,12 @@ export function FinanceManager({ itens, setItens }: FinanceManagerProps) {
     modalNovo.fechar()
   }
 
+  const toggleConcluido = (id: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation()
+    setItens(prev => prev.map(i => i.id === id ? { ...i, concluido: !i.concluido } : i))
+    if (itemDetalhe?.id === id) setItemDetalhe(prev => prev ? { ...prev, concluido: !prev.concluido } : null)
+  }
+
   const salvarItem = (itemAtualizado: ItemFinanceiro) => {
     setItens(prev => prev.map(i => i.id === itemAtualizado.id ? itemAtualizado : i))
     if (itemDetalhe?.id === itemAtualizado.id) setItemDetalhe(itemAtualizado)
@@ -69,7 +75,7 @@ export function FinanceManager({ itens, setItens }: FinanceManagerProps) {
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-2xl font-semibold text-slate-100">Gerenciador Financeiro & Comprovantes</h1>
-          <p className="text-slate-400 text-sm mt-1">Receitas, despesas, instituição bancária e comprovantes de pagamento</p>
+          <p className="text-slate-400 text-sm mt-1">Receitas, despesas, status de pagamento, banco e comprovantes</p>
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1 bg-slate-800 rounded-xl p-1">
@@ -102,7 +108,10 @@ export function FinanceManager({ itens, setItens }: FinanceManagerProps) {
 
       <div className="grid md:grid-cols-2 gap-6">
         <div>
-          <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Receitas & Poupança</h2>
+          <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3 flex items-center justify-between">
+            <span>Receitas & Poupança</span>
+            <span className="text-[11px] text-teal-400 font-medium font-normal">Clique no círculo para marcar como Realizado</span>
+          </h2>
           <div className="space-y-2">
             {receitas.map(item => (
               <LinhaFinanceira
@@ -111,6 +120,7 @@ export function FinanceManager({ itens, setItens }: FinanceManagerProps) {
                 moeda={moeda}
                 corCat={CORES_CATEGORIAS[item.categoria] ?? '#475569'}
                 onClick={() => setItemDetalhe(item)}
+                onToggleConcluido={e => toggleConcluido(item.id, e)}
                 onRemover={() => remover(item.id)}
               />
             ))}
@@ -122,7 +132,10 @@ export function FinanceManager({ itens, setItens }: FinanceManagerProps) {
         </div>
 
         <div>
-          <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Despesas & Custos</h2>
+          <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3 flex items-center justify-between">
+            <span>Despesas & Custos</span>
+            <span className="text-[11px] text-red-400 font-medium font-normal">Clique no círculo para marcar como Pago</span>
+          </h2>
           <div className="space-y-2">
             {despesas.map(item => (
               <LinhaFinanceira
@@ -131,6 +144,7 @@ export function FinanceManager({ itens, setItens }: FinanceManagerProps) {
                 moeda={moeda}
                 corCat={CORES_CATEGORIAS[item.categoria] ?? '#475569'}
                 onClick={() => setItemDetalhe(item)}
+                onToggleConcluido={e => toggleConcluido(item.id, e)}
                 onRemover={() => remover(item.id)}
               />
             ))}
@@ -183,11 +197,26 @@ export function FinanceManager({ itens, setItens }: FinanceManagerProps) {
 
       {/* Modal Detalhes & Comprovantes */}
       {itemDetalhe && (
-        <Modal aberto={Boolean(itemDetalhe)} onFechar={() => setItemDetalhe(null)} titulo="Detalhes & Comprovantes Financeiros">
+        <Modal aberto={Boolean(itemDetalhe)} onFechar={() => setItemDetalhe(null)} titulo="Detalhes & Comprovantes Financeiros" tamanho="3xl">
           <div className="space-y-5 text-slate-100">
-            <div>
-              <h3 className="text-lg font-bold text-slate-100">{itemDetalhe.label}</h3>
-              <p className="text-xs text-slate-400 mt-0.5">{itemDetalhe.subLabel}</p>
+            <div className="flex items-start justify-between gap-4 flex-wrap border-b border-slate-800 pb-3">
+              <div>
+                <h3 className="text-lg font-bold text-slate-100">{itemDetalhe.label}</h3>
+                <p className="text-xs text-slate-400 mt-0.5">{itemDetalhe.subLabel}</p>
+              </div>
+
+              {/* Toggle Concluido no Modal */}
+              <button
+                type="button"
+                onClick={e => toggleConcluido(itemDetalhe.id, e)}
+                className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  itemDetalhe.concluido
+                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-sm'
+                    : 'bg-amber-500/10 text-amber-300 border-amber-500/30'
+                }`}
+              >
+                {itemDetalhe.concluido ? '✅ Concluído / Pago' : '⏳ Marcar como Concluído'}
+              </button>
             </div>
 
             <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl grid grid-cols-2 gap-3">
@@ -262,8 +291,8 @@ export function FinanceManager({ itens, setItens }: FinanceManagerProps) {
   )
 }
 
-function LinhaFinanceira({ item, moeda, corCat, onClick, onRemover }: {
-  item: ItemFinanceiro; moeda: 'BRL' | 'EUR'; corCat: string; onClick: () => void; onRemover: () => void
+function LinhaFinanceira({ item, moeda, corCat, onClick, onToggleConcluido, onRemover }: {
+  item: ItemFinanceiro; moeda: 'BRL' | 'EUR'; corCat: string; onClick: () => void; onToggleConcluido: (e: React.MouseEvent) => void; onRemover: () => void
 }) {
   const valor = moeda === 'BRL' ? item.valorBRL : item.valorEUR
   const numAnexos = item.anexos?.length || 0
@@ -271,12 +300,38 @@ function LinhaFinanceira({ item, moeda, corCat, onClick, onRemover }: {
   return (
     <div
       onClick={onClick}
-      className="group flex items-center gap-3 px-4 py-3 bg-slate-900 border border-slate-800 hover:border-teal-500/40 rounded-xl transition-all cursor-pointer"
+      className={`group flex items-center gap-3 px-4 py-3 bg-slate-900 border rounded-xl transition-all cursor-pointer ${
+        item.concluido
+          ? 'border-emerald-500/30 bg-emerald-950/10'
+          : 'border-slate-800 hover:border-teal-500/40'
+      }`}
     >
+      {/* Botao de Status Concluido / Pago */}
+      <button
+        type="button"
+        onClick={onToggleConcluido}
+        title={item.concluido ? 'Marcar como pendente' : 'Marcar como concluído / pago'}
+        className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 border transition-all ${
+          item.concluido
+            ? 'bg-emerald-500 text-slate-950 border-emerald-400 shadow-sm'
+            : 'border-slate-700 text-transparent hover:border-teal-400 hover:text-teal-400'
+        }`}
+      >
+        ✓
+      </button>
+
       <div className="w-1 h-8 rounded-full shrink-0" style={{ background: corCat }} />
+
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <p className="text-slate-200 text-sm font-medium truncate">{item.label}</p>
+        <div className="flex items-center gap-2 flex-wrap">
+          <p className={`text-sm font-medium truncate ${item.concluido ? 'text-slate-400 line-through' : 'text-slate-200'}`}>
+            {item.label}
+          </p>
+          {item.concluido && (
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-semibold border border-emerald-500/20">
+              {item.tipo === 'receita' ? '✓ Recebido' : '✓ Pago'}
+            </span>
+          )}
           {item.banco && (
             <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 font-semibold border border-slate-700">
               🏦 {item.banco}
@@ -293,12 +348,14 @@ function LinhaFinanceira({ item, moeda, corCat, onClick, onRemover }: {
           {item.recorrente && <span className="ml-1 text-amber-500">🔄 mensal</span>}
         </p>
       </div>
+
       <div className="text-right shrink-0">
         <p className={`text-sm font-semibold ${item.tipo === 'receita' ? 'text-teal-400' : 'text-slate-300'}`}>
           {item.tipo === 'receita' ? '+' : '−'}{fmt(valor, moeda)}
         </p>
         <p className="text-slate-600 text-xs">{item.categoria}</p>
       </div>
+
       <button
         onClick={e => {
           e.stopPropagation()

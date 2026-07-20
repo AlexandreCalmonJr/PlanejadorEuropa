@@ -86,6 +86,7 @@ CREATE TABLE IF NOT EXISTS public.itens_financeiros (
   tipo TEXT NOT NULL CHECK (tipo IN ('receita', 'despesa')),
   categoria TEXT NOT NULL,
   recorrente BOOLEAN DEFAULT false,
+  concluido BOOLEAN DEFAULT false,
   banco TEXT,
   comprovante_entrada BOOLEAN DEFAULT false,
   anexos JSONB DEFAULT '[]'::jsonb,

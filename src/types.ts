@@ -112,6 +112,7 @@ export interface ItemFinanceiro {
   tipo: 'receita' | 'despesa'
   categoria: string
   recorrente?: boolean
+  concluido?: boolean
   banco?: string
   comprovanteEntrada?: boolean
   anexos?: AnexoDocumento[]
