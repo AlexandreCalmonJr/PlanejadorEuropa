@@ -7,23 +7,47 @@ interface ItemNav {
   id: View
   label: string
   icon: (props: { size: number; ativo: boolean }) => ReactNode
-  badge?: string
+  badgeKey?: 'vagas' | 'faculdades' | 'documents' | 'visto'
   badgeColor?: string
 }
 
 const ITENS_NAV: ItemNav[] = [
   { id: 'overview',   label: 'Resumo',       icon: IconeGrade },
-  { id: 'kanban',     label: 'Vagas',        icon: IconeKanban,     badge: '7' },
-  { id: 'educacao',   label: 'Faculdades',   icon: IconeGraduacao,  badge: '9', badgeColor: 'bg-violet-500/20 text-violet-400' },
-  { id: 'documents',  label: 'Burocracia',   icon: IconeArquivo,    badge: '4', badgeColor: 'bg-sky-500/20 text-sky-400' },
+  { id: 'kanban',     label: 'Vagas',        icon: IconeKanban,     badgeKey: 'vagas' },
+  { id: 'educacao',   label: 'Faculdades',   icon: IconeGraduacao,  badgeKey: 'faculdades', badgeColor: 'bg-violet-500/20 text-violet-400' },
+  { id: 'documents',  label: 'Burocracia',   icon: IconeArquivo,    badgeKey: 'documents',  badgeColor: 'bg-sky-500/20 text-sky-400' },
   { id: 'finance',    label: 'Finanças',     icon: IconeCarteira },
-  { id: 'visto',      label: 'Visto',        icon: IconePassaporte, badge: '!', badgeColor: 'bg-amber-500/20 text-amber-400' },
+  { id: 'visto',      label: 'Visto',        icon: IconePassaporte, badgeKey: 'visto',      badgeColor: 'bg-amber-500/20 text-amber-400' },
   { id: 'logistica',  label: 'Logística',    icon: IconeLogistica },
   { id: 'voos',       label: 'Voos',         icon: IconeVoo },
 ]
 
-export function Sidebar({ ativa, onNav, onSair }: { ativa: View; onNav: (v: View) => void; onSair: () => void }) {
+export function Sidebar({
+  ativa,
+  onNav,
+  onSair,
+  vagasCount = 0,
+  faculdadesCount = 0,
+  docsCount = 0,
+  etapasVistoPendentesCount = 0,
+}: {
+  ativa: View
+  onNav: (v: View) => void
+  onSair: () => void
+  vagasCount?: number
+  faculdadesCount?: number
+  docsCount?: number
+  etapasVistoPendentesCount?: number
+}) {
   const [recuada, setRecuada] = useLocalStorage<boolean>('ep_sidebar_recuada', false)
+
+  const getBadgeValue = (key?: string) => {
+    if (key === 'vagas') return vagasCount > 0 ? String(vagasCount) : null
+    if (key === 'faculdades') return faculdadesCount > 0 ? String(faculdadesCount) : null
+    if (key === 'documents') return docsCount > 0 ? String(docsCount) : null
+    if (key === 'visto') return etapasVistoPendentesCount > 0 ? '!' : null
+    return null
+  }
 
   return (
     <>
@@ -55,8 +79,9 @@ export function Sidebar({ ativa, onNav, onSair }: { ativa: View; onNav: (v: View
 
         {/* Links de Navegacao */}
         <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
-          {ITENS_NAV.map(({ id, label, icon: Icone, badge, badgeColor }) => {
+          {ITENS_NAV.map(({ id, label, icon: Icone, badgeKey, badgeColor }) => {
             const ativo = ativa === id
+            const badge = getBadgeValue(badgeKey)
             return (
               <button
                 key={id}
