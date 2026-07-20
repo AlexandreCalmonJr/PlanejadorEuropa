@@ -42,6 +42,57 @@ const VOOS_DEMO: Voo[] = [
   },
 ]
 
+const NOTAS_DEMO = [
+  {
+    id: 'nota-demo-1',
+    titulo: '📌 Protocolo do Visto VFS Global',
+    conteudo: 'Protocolo: BR-SSA-2026-9841.\nComparecer no Consulado em Salvador com 15 min de antecedência.\nLevar pasta organizada com originais e 2 cópias simples de cada documento.',
+    cor: '#F97316',
+    fixada: true,
+    criadoEm: '20/07/2026 10:00',
+    atualizadoEm: '20/07/2026 10:00',
+  },
+  {
+    id: 'nota-demo-2',
+    titulo: '💡 Dicas de Moradia em Coimbra',
+    conteudo: 'Bairros recomendados:\n1. Solum — Excelente infraestrutura, perto do ISEC e centros comerciais.\n2. Celas — Próximo aos hospitais e pólo de saúde.\n3. Baixa/Alta — Centro histórico, perto da Universidade de Coimbra.\nMédia de T2 reformado: €650 a €800/mês.',
+    cor: '#14B8A6',
+    fixada: true,
+    criadoEm: '20/07/2026 10:30',
+    atualizadoEm: '20/07/2026 10:30',
+  },
+  {
+    id: 'nota-demo-3',
+    titulo: '📞 Contatos Importantes de Imigração',
+    conteudo: '• Dra. Mafalda (Advogada de Imigração PT): +351 912 345 678\n• Representante Fiscal (Mãe em Coimbra): Dona Maria\n• VFS Global SSA: (71) 3000-0000\n• AIMA / SEF Coimbra: Rua Venâncio Rodrigues, n.º 25',
+    cor: '#8B5CF6',
+    fixada: false,
+    criadoEm: '20/07/2026 11:15',
+    atualizadoEm: '20/07/2026 11:15',
+  },
+  {
+    id: 'nota-demo-4',
+    titulo: '🚀 Stack Tech em Alta em Portugal',
+    conteudo: 'Tecnologias mais exigidas nas entrevistas de TI em Coimbra e Porto:\n• Frontend: React, TypeScript, Next.js, TailWind\n• Backend: Node.js, Python (Django/FastAPI), Java (Spring Boot)\n• Mobile: Flutter, React Native\n• Cloud: AWS, Docker, Kubernetes',
+    cor: '#0284C7',
+    fixada: false,
+    criadoEm: '20/07/2026 14:20',
+    atualizadoEm: '20/07/2026 14:20',
+  },
+]
+
+const COUNTDOWNS_DEMO = [
+  { id: 'cd1', label: 'Embarque Salvador → Lisboa', data: '2026-12-15', icone: '✈️' },
+  { id: 'cd2', label: 'Entrega de Docs no Consulado', data: '2026-09-15', icone: '📄' },
+  { id: 'cd3', label: 'Início das Aulas na Univ. de Coimbra', data: '2026-10-01', icone: '🎓' },
+  { id: 'cd4', label: 'Resultado da Entrevista na Feedzai', data: '2026-08-10', icone: '💼' },
+]
+
+const EVENTOS_CALENDARIO_DEMO = [
+  { id: 'ev1', label: '💼 Entrevista Técnica Feedzai', data: '2026-08-10', icone: '💼' },
+  { id: 'ev2', label: '📜 Vencimento da Certidão Apostilada', data: '2026-09-01', icone: '📜' },
+]
+
 interface DemoSeederProps {
   setVagas: (v: Vaga[]) => void
   setFaculdades: (f: Faculdade[]) => void
@@ -73,7 +124,7 @@ export function DemoSeeder({
     setMensagemSucesso('')
 
     try {
-      // 1. Atualizar estados locais
+      // 1. Atualizar estados locais dos módulos
       setVagas(VAGAS_INICIAIS)
       setFaculdades(FACULDADES_INICIAIS)
       setDocs(DOCUMENTOS_INICIAIS)
@@ -83,7 +134,12 @@ export function DemoSeeder({
       setTarefasLogistica(TAREFAS_LOGISTICA_INICIAIS)
       setVoos(VOOS_DEMO)
 
-      // 2. Sincronizar com Supabase se ativo
+      // 2. Gravar Notas e Calendário em localStorage
+      localStorage.setItem('ep_notas', JSON.stringify(NOTAS_DEMO))
+      localStorage.setItem('ep_countdowns', JSON.stringify(COUNTDOWNS_DEMO))
+      localStorage.setItem('ep_calendar_events', JSON.stringify(EVENTOS_CALENDARIO_DEMO))
+
+      // 3. Sincronizar com Supabase se ativo
       if (isSupabaseConfigured) {
         for (const item of VAGAS_INICIAIS) await salvarItemSupabase('vagas', item)
         for (const item of FACULDADES_INICIAIS) await salvarItemSupabase('faculdades', item)
@@ -95,7 +151,7 @@ export function DemoSeeder({
         for (const item of VOOS_DEMO) await salvarItemSupabase('voos', item)
       }
 
-      setMensagemSucesso('🎉 Todos os dados fictícios foram carregados no sistema e no Supabase com sucesso!')
+      setMensagemSucesso('🎉 Todos os dados de demonstração (Finanças, Burocracia, Vagas, Faculdades, Visto, Notas e Calendário) foram carregados!')
     } catch (err) {
       console.error('Erro ao popular dados:', err)
     } finally {
@@ -118,6 +174,10 @@ export function DemoSeeder({
       setDocsConsulado([])
       setTarefasLogistica([])
       setVoos([])
+
+      localStorage.removeItem('ep_notas')
+      localStorage.removeItem('ep_countdowns')
+      localStorage.removeItem('ep_calendar_events')
 
       if (isSupabaseConfigured) {
         for (const item of VAGAS_INICIAIS) await deletarItemSupabase('vagas', item.id)
@@ -144,10 +204,10 @@ export function DemoSeeder({
       <div>
         <div className="flex items-center gap-2">
           <span className="text-2xl">✨</span>
-          <h1 className="text-2xl font-bold text-slate-100">Modo de Apresentação & Testes</h1>
+          <h1 className="text-2xl font-bold text-slate-100">Modo de Apresentação & Testes (Demo)</h1>
         </div>
         <p className="text-slate-400 text-sm mt-1">
-          Gere dados fictícios realistas instantaneamente para demonstrar o sistema ou limpe o banco para iniciar do zero.
+          Gere um ambiente completo com dados realistas para testar todos os módulos (Finanças, Burocracia, Vistas, Vagas, Faculdades, Notas e Calendário).
         </p>
       </div>
 
@@ -162,7 +222,7 @@ export function DemoSeeder({
             <p className="text-[11px] text-slate-400 mt-0.5">
               {isSupabaseConfigured
                 ? 'Os dados populados serão gravados diretamente nas suas tabelas do Supabase.'
-                : 'Configure o Supabase no .env.local para gravar no banco remoto.'}
+                : 'Os dados populados serão salvos instantaneamente no seu navegador.'}
             </p>
           </div>
         </div>
@@ -180,24 +240,27 @@ export function DemoSeeder({
         </div>
       )}
 
-      {/* Cards de Acoes */}
+      {/* Cards de Ações */}
       <div className="grid md:grid-cols-2 gap-6">
-        {/* Card 1: Popular Dados Ficticios */}
+        {/* Card 1: Popular Dados Fictícios */}
         <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 hover:border-teal-500/40 transition-all flex flex-col justify-between space-y-4">
           <div>
             <div className="w-10 h-10 rounded-xl bg-teal-500/10 text-teal-400 border border-teal-500/20 flex items-center justify-center text-lg font-bold mb-3">
               🚀
             </div>
-            <h3 className="text-base font-bold text-slate-100">Popular Dados de Apresentação</h3>
+            <h3 className="text-base font-bold text-slate-100">Popular Dados Completo de Demo</h3>
             <p className="text-slate-400 text-xs mt-2 leading-relaxed">
-              Insere um conjunto completo e realista de dados fictícios para apresentação: 7 vagas Kanban, 9 faculdades em Portugal/Espanha, 4 documentos burocráticos, orçamento financeiro detalhado, etapas do visto D3/D8 e logística de viagem.
+              Insere um conjunto completo e realista cobrindo 100% dos módulos do aplicativo.
             </p>
 
             <div className="mt-4 p-3 bg-slate-950/60 rounded-xl border border-slate-800 text-[11px] text-slate-400 space-y-1">
-              <p>✔ 7 Vagas de Emprego Tech em Coimbra/Porto</p>
-              <p>✔ 9 Cursos Universitários (UC, ISEC, ISCAC)</p>
-              <p>✔ Orçamento Financeiro em EUR e BRL</p>
-              <p>✔ Timeline Completa do Visto VFS</p>
+              <p>✔ 💼 7 Vagas Tech (Critical, Feedzai, Talkdesk, OutSystems)</p>
+              <p>✔ 🎓 9 Opções de Faculdades (UC Coimbra, ISEC, Espanha)</p>
+              <p>✔ 📜 13 Documentos Burocráticos com Trava e Pessoas</p>
+              <p>✔ 💰 Orçamento Financeiro em EUR/BRL (Caixa R$55.000)</p>
+              <p>✔ 🛂 Timeline VFS Global do Visto D3 e Checklist</p>
+              <p>✔ 📋 4 Notas Rápidas (Protocolos, Moradia, Dicas Tech)</p>
+              <p>✔ 📅 4 Contadores Regressivos & Eventos no Calendário</p>
             </div>
           </div>
 
@@ -206,7 +269,7 @@ export function DemoSeeder({
             disabled={carregando}
             className="w-full py-3 px-4 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-xs shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50"
           >
-            {carregando ? 'Gravando dados...' : '✨ Carregar Dados Fictícios'}
+            {carregando ? 'Gravando dados...' : '✨ Carregar Dados Completos de Demo'}
           </button>
         </div>
 
@@ -216,15 +279,15 @@ export function DemoSeeder({
             <div className="w-10 h-10 rounded-xl bg-red-500/10 text-red-400 border border-red-500/20 flex items-center justify-center text-lg font-bold mb-3">
               🧹
             </div>
-            <h3 className="text-base font-bold text-slate-100">Zerar Banco de Dados</h3>
+            <h3 className="text-base font-bold text-slate-100">Zerar Todos os Dados</h3>
             <p className="text-slate-400 text-xs mt-2 leading-relaxed">
-              Remove todos os registros cadastrados de todas as abas para que você possa iniciar o planejamento com seus dados reais do zero.
+              Remove todos os registros cadastrados de todas as abas e notas para iniciar o planejamento do zero.
             </p>
 
             <div className="mt-4 p-3 bg-slate-950/60 rounded-xl border border-slate-800 text-[11px] text-slate-500 space-y-1">
               <p>⚠ Apaga Vagas, Faculdades e Documentos</p>
-              <p>⚠ Apaga Registros Financeiros e Voos</p>
-              <p>⚠ Não afeta suas configurações de login</p>
+              <p>⚠ Apaga Registros Financeiros, Voos e Visto</p>
+              <p>⚠ Apaga Notas Rápidas e Calendário</p>
             </div>
           </div>
 

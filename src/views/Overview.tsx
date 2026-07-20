@@ -2,6 +2,14 @@ import { fmt } from '../helpers'
 import type { ItemFinanceiro, Documento, EtapaVisto, Prazo, Vaga, Faculdade, TarefaLogistica, Voo } from '../types'
 import { ProgressRing } from '../components/ProgressRing'
 import { CardEstatistica, BarraOrcamento, PontoLegenda } from '../components/StatCard'
+import { useLocalStorage } from '../hooks/useLocalStorage'
+
+interface ContadorRegressivo {
+  id: string
+  label: string
+  data: string
+  icone: string
+}
 
 interface OverviewProps {
   itensFinanceiros: ItemFinanceiro[]
@@ -24,6 +32,8 @@ export function Overview({
   tarefasLogistica = [],
   voos = [],
 }: OverviewProps) {
+  const [contadores] = useLocalStorage<ContadorRegressivo[]>('ep_countdowns', [])
+
   const totalBRL = itensFinanceiros.filter(i => i.tipo === 'receita').reduce((s, i) => s + i.valorBRL, 0)
   const totalEUR = itensFinanceiros.filter(i => i.tipo === 'receita').reduce((s, i) => s + i.valorEUR, 0)
   const despBRL  = itensFinanceiros.filter(i => i.tipo === 'despesa').reduce((s, i) => s + i.valorBRL, 0)
@@ -57,7 +67,6 @@ export function Overview({
 
   // Proximos passos e prazos integrados de TODO o sistema
   const prazosSistema = [
-    // 1. Etapas do visto em andamento ou pendentes com datas
     ...etapasVisto
       .filter(e => e.status !== 'Concluído')
       .map(e => ({
@@ -68,8 +77,6 @@ export function Overview({
         modulo: '🛂 Visto',
         corModulo: 'bg-amber-500/10 text-amber-300 border-amber-500/20',
       })),
-
-    // 2. Documentos em andamento ou bloqueados
     ...documentos
       .filter(d => d.status === 'Em Andamento' || (d.bloqueadoPor && d.bloqueadoPor.length > 0))
       .map(d => {
@@ -86,8 +93,6 @@ export function Overview({
           corModulo: 'bg-sky-500/10 text-sky-300 border-sky-500/20',
         }
       }),
-
-    // 3. Tarefas de logistica pendentes/em andamento
     ...tarefasLogistica
       .filter(t => t.status !== 'Concluído')
       .slice(0, 2)
@@ -99,8 +104,6 @@ export function Overview({
         modulo: '📦 Logística',
         corModulo: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20',
       })),
-
-    // 4. Prazos explícitos cadastrados
     ...prazos.map((p, i) => ({
       id: `prazo-exp-${i}`,
       label: p.label,
@@ -111,12 +114,94 @@ export function Overview({
     }))
   ]
 
+  // ─── Progresso Geral da Imigração ─────────────────────────────────────────
+  const progressoModulos = [
+    { label: '📜 Documentos', concluido: concluidos, total: total || 1, cor: '#0EA5E9' },
+    { label: '🛂 Visto', concluido: etapasVistoConcluidas, total: etapasVisto.length || 1, cor: '#F97316' },
+    { label: '📦 Logística', concluido: logisticaConcluida, total: totalLogistica || 1, cor: '#10B981' },
+    { label: '💼 Vagas', concluido: vagas.filter(v => v.coluna === 'Oferta').length, total: Math.max(vagasCandidatadas, 1), cor: '#0284C7' },
+  ]
+  const progressoGeral = progressoModulos.reduce((s, m) => s + (m.concluido / m.total), 0) / progressoModulos.length
+  const pctGeral = Math.round(progressoGeral * 100)
+
+  // ─── Contadores Regressivos ────────────────────────────────────────────────
+  const hoje = new Date()
+
   return (
     <div className="p-6 md:p-8 w-full pb-24 md:pb-8 space-y-6">
       <div>
         <h1 className="text-2xl font-semibold text-slate-100">Visão Geral & Painel de Controle</h1>
         <p className="text-slate-400 text-sm mt-1">Sua jornada de imigração · Alexandre & Andressa · Salvador → Coimbra</p>
       </div>
+
+      {/* ─── BARRA DE PROGRESSO GERAL ─── */}
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+            📊 Progresso Geral da Imigração
+          </h2>
+          <span className={`text-lg font-black ${pctGeral >= 75 ? 'text-teal-400' : pctGeral >= 40 ? 'text-amber-400' : 'text-orange-400'}`}>
+            {pctGeral}%
+          </span>
+        </div>
+        {/* Barra principal */}
+        <div className="w-full h-4 bg-slate-800 rounded-full overflow-hidden mb-4">
+          <div
+            className="h-full rounded-full transition-all duration-700 ease-out"
+            style={{
+              width: `${pctGeral}%`,
+              background: pctGeral >= 75
+                ? 'linear-gradient(90deg, #14B8A6, #10B981)'
+                : pctGeral >= 40
+                  ? 'linear-gradient(90deg, #F59E0B, #F97316)'
+                  : 'linear-gradient(90deg, #F97316, #EF4444)',
+            }}
+          />
+        </div>
+        {/* Mini-barras por módulo */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {progressoModulos.map(m => {
+            const p = Math.round((m.concluido / m.total) * 100)
+            return (
+              <div key={m.label} className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] text-slate-400 font-medium">{m.label}</span>
+                  <span className="text-[11px] font-bold" style={{ color: m.cor }}>{m.concluido}/{m.total}</span>
+                </div>
+                <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                  <div className="h-full rounded-full transition-all duration-500" style={{ width: `${p}%`, background: m.cor }} />
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* ─── CONTADORES REGRESSIVOS ─── */}
+      {contadores.length > 0 && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {contadores.slice(0, 4).map(c => {
+            const dataAlvo = new Date(c.data + 'T00:00:00')
+            const diffMs = dataAlvo.getTime() - hoje.getTime()
+            const diffDias = Math.ceil(diffMs / (1000 * 60 * 60 * 24))
+            const passado = diffDias < 0
+            return (
+              <div key={c.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-4">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="text-lg">{c.icone}</span>
+                  <span className="text-[11px] text-slate-400 font-medium truncate">{c.label}</span>
+                </div>
+                <p className={`text-2xl font-black ${passado ? 'text-red-400' : diffDias <= 30 ? 'text-amber-400' : 'text-teal-400'}`}>
+                  {passado ? `${Math.abs(diffDias)}d atrás` : `${diffDias} dias`}
+                </p>
+                <p className="text-slate-600 text-[10px] mt-0.5">
+                  {dataAlvo.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })}
+                </p>
+              </div>
+            )
+          })}
+        </div>
+      )}
 
       {/* Cards de estatísticas financeiras */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react'
-import type { View } from '../types'
-import { IconeGrade, IconeKanban, IconeArquivo, IconeCarteira, IconePassaporte, IconeGraduacao, IconeLogistica, IconeVoo, IconeDemo, IconeTutorial } from './Icons'
+import type { View, Vaga, Faculdade, Documento } from '../types'
+import { IconeGrade, IconeKanban, IconeArquivo, IconeCarteira, IconePassaporte, IconeGraduacao, IconeLogistica, IconeVoo, IconeDemo, IconeTutorial, IconeNotas, IconeCalendario } from './Icons'
 import { useLocalStorage } from '../hooks/useLocalStorage'
 
 interface ItemNav {
@@ -20,8 +20,10 @@ const ITENS_NAV: ItemNav[] = [
   { id: 'visto',      label: 'Visto',        icon: IconePassaporte, badgeKey: 'visto',      badgeColor: 'bg-amber-500/20 text-amber-400' },
   { id: 'logistica',  label: 'Logística',    icon: IconeLogistica },
   { id: 'voos',       label: 'Voos',         icon: IconeVoo },
-  { id: 'demo',       label: 'Modo Demo',    icon: IconeDemo },
+  { id: 'calendario', label: 'Calendário',   icon: IconeCalendario },
+  { id: 'notas',      label: 'Notas',        icon: IconeNotas },
   { id: 'tutorial',   label: 'Tutorial',     icon: IconeTutorial },
+  { id: 'demo',       label: 'Modo Demo',    icon: IconeDemo },
 ]
 
 // Abas de acesso rapido para a barra inferior no mobile
@@ -35,6 +37,9 @@ export function Sidebar({
   faculdadesCount = 0,
   docsCount = 0,
   etapasVistoPendentesCount = 0,
+  vagas = [],
+  faculdades = [],
+  docs = [],
 }: {
   ativa: View
   onNav: (v: View) => void
@@ -43,9 +48,14 @@ export function Sidebar({
   faculdadesCount?: number
   docsCount?: number
   etapasVistoPendentesCount?: number
+  vagas?: Vaga[]
+  faculdades?: Faculdade[]
+  docs?: Documento[]
 }) {
   const [recuada, setRecuada] = useLocalStorage<boolean>('ep_sidebar_recuada', false)
   const [menuMobileAberto, setMenuMobileAberto] = useState(false)
+  const [buscaGlobal, setBuscaGlobal] = useState('')
+  const [buscaFoco, setBuscaFoco] = useState(false)
 
   const getBadgeValue = (key?: string) => {
     if (key === 'vagas') return vagasCount > 0 ? String(vagasCount) : null
@@ -56,6 +66,39 @@ export function Sidebar({
   }
 
   const itemAtivo = ITENS_NAV.find(i => i.id === ativa)
+
+  // ─── Busca Global ──────────────────────────────────────────────────────────
+  const termo = buscaGlobal.trim().toLowerCase()
+  const resultadosBusca = termo ? [
+    ...ITENS_NAV.filter(n => n.label.toLowerCase().includes(termo)).map(n => ({
+      id: `nav-${n.id}`,
+      titulo: n.label,
+      subtitulo: 'Módulo do sistema',
+      modulo: n.id,
+      icone: '📌',
+    })),
+    ...vagas.filter(v => v.empresa.toLowerCase().includes(termo) || v.cargo.toLowerCase().includes(termo)).map(v => ({
+      id: `vaga-${v.id}`,
+      titulo: `${v.empresa} — ${v.cargo}`,
+      subtitulo: `Candidatura (${v.coluna})`,
+      modulo: 'kanban' as View,
+      icone: '💼',
+    })),
+    ...faculdades.filter(f => f.instituicao.toLowerCase().includes(termo) || f.curso.toLowerCase().includes(termo)).map(f => ({
+      id: `fac-${f.id}`,
+      titulo: `${f.instituicao} — ${f.curso}`,
+      subtitulo: `Faculdade (${f.coluna})`,
+      modulo: 'educacao' as View,
+      icone: '🎓',
+    })),
+    ...docs.filter(d => d.nome.toLowerCase().includes(termo) || d.descricao.toLowerCase().includes(termo)).map(d => ({
+      id: `doc-${d.id}`,
+      titulo: d.nome,
+      subtitulo: `Documento (${d.status})`,
+      modulo: 'documents' as View,
+      icone: '📜',
+    })),
+  ].slice(0, 8) : []
 
   return (
     <>
@@ -109,8 +152,48 @@ export function Sidebar({
           </button>
         </div>
 
+        {/* Campo de Busca Global */}
+        {!recuada && (
+          <div className="p-3 border-b border-slate-800 relative">
+            <input
+              type="text"
+              placeholder="🔍 Busca rápida..."
+              value={buscaGlobal}
+              onChange={e => setBuscaGlobal(e.target.value)}
+              onFocus={() => setBuscaFoco(true)}
+              onBlur={() => setTimeout(() => setBuscaFoco(false), 200)}
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-teal-500 transition-all"
+            />
+            {/* Popover de Resultados */}
+            {buscaFoco && termo && (
+              <div className="absolute top-full left-3 right-3 mt-1 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-50 overflow-hidden max-h-64 overflow-y-auto divide-y divide-slate-800/60">
+                {resultadosBusca.length === 0 ? (
+                  <div className="p-3 text-center text-xs text-slate-500">Nenhum resultado encontrado.</div>
+                ) : (
+                  resultadosBusca.map(r => (
+                    <button
+                      key={r.id}
+                      onClick={() => {
+                        onNav(r.modulo)
+                        setBuscaGlobal('')
+                      }}
+                      className="w-full p-2.5 text-left hover:bg-slate-800 flex items-center gap-2.5 transition-all"
+                    >
+                      <span className="text-sm shrink-0">{r.icone}</span>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-slate-200 text-xs font-semibold truncate">{r.titulo}</p>
+                        <p className="text-slate-500 text-[10px] truncate">{r.subtitulo}</p>
+                      </div>
+                    </button>
+                  ))
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Links de Navegacao */}
-        <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
+        <nav className="flex-1 px-2 py-3 space-y-1 overflow-y-auto">
           {ITENS_NAV.map(({ id, label, icon: Icone, badgeKey, badgeColor }) => {
             const ativo = ativa === id
             const badge = getBadgeValue(badgeKey)
@@ -119,7 +202,7 @@ export function Sidebar({
                 key={id}
                 onClick={() => onNav(id as View)}
                 title={recuada ? label : undefined}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 ${
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition-all duration-150 ${
                   recuada ? 'justify-center px-0' : ''
                 } ${
                   ativo ? 'bg-teal-500/10 text-teal-400 font-bold' : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/60'
@@ -130,7 +213,7 @@ export function Sidebar({
                   <>
                     <span className="truncate">{label}</span>
                     {badge && (
-                      <span className={`ml-auto text-xs px-1.5 py-0.5 rounded-md ${badgeColor ?? 'bg-slate-700 text-slate-300'}`}>
+                      <span className={`ml-auto text-[10px] px-1.5 py-0.5 rounded-md ${badgeColor ?? 'bg-slate-700 text-slate-300'}`}>
                         {badge}
                       </span>
                     )}

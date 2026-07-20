@@ -25,6 +25,8 @@ import { LogisticsTracker } from './views/LogisticsTracker'
 import { FlightPlanner } from './views/FlightPlanner'
 import { DemoSeeder } from './views/DemoSeeder'
 import { Tutorial } from './views/Tutorial'
+import { QuickNotes } from './views/QuickNotes'
+import { Calendar } from './views/Calendar'
 
 export default function App() {
   const [autenticado, setAutenticado] = useState<boolean>(() => {
@@ -118,6 +120,9 @@ export default function App() {
         faculdadesCount={faculdades.length}
         docsCount={docs.length}
         etapasVistoPendentesCount={etapasVisto.filter(e => e.status !== 'Concluído').length}
+        vagas={vagas}
+        faculdades={faculdades}
+        docs={docs}
       />
       <main className="flex-1 overflow-y-auto bg-slate-950 pb-20 md:pb-0">
         {view === 'overview'  && (
@@ -132,14 +137,16 @@ export default function App() {
             voos={voos}
           />
         )}
-        {view === 'kanban'    && <JobBoard vagas={vagas} setVagas={setVagas} />}
-        {view === 'educacao'  && <EducationBoard faculdades={faculdades} setFaculdades={setFaculdades} />}
-        {view === 'documents' && <BureaucracyTracker docs={docs} setDocs={setDocs} />}
-        {view === 'finance'   && <FinanceManager itens={itensFinanceiros} setItens={setItensFinanceiros} />}
-        {view === 'visto'     && <VisaTracker etapas={etapasVisto} setEtapas={setEtapasVisto} docsConsulado={docsConsulado} setDocsConsulado={setDocsConsulado} />}
-        {view === 'logistica' && <LogisticsTracker tarefas={tarefasLogistica} setTarefas={setTarefasLogistica} />}
-        {view === 'voos'      && <FlightPlanner voos={voos} setVoos={setVoos} />}
-        {view === 'demo'      && (
+        {view === 'kanban'     && <JobBoard vagas={vagas} setVagas={setVagas} />}
+        {view === 'educacao'   && <EducationBoard faculdades={faculdades} setFaculdades={setFaculdades} />}
+        {view === 'documents'  && <BureaucracyTracker docs={docs} setDocs={setDocs} />}
+        {view === 'finance'    && <FinanceManager itens={itensFinanceiros} setItens={setItensFinanceiros} />}
+        {view === 'visto'      && <VisaTracker etapas={etapasVisto} setEtapas={setEtapasVisto} docsConsulado={docsConsulado} setDocsConsulado={setDocsConsulado} />}
+        {view === 'logistica'  && <LogisticsTracker tarefas={tarefasLogistica} setTarefas={setTarefasLogistica} />}
+        {view === 'voos'       && <FlightPlanner voos={voos} setVoos={setVoos} />}
+        {view === 'calendario' && <Calendar voos={voos} prazos={PRAZOS_INICIAIS} />}
+        {view === 'notas'      && <QuickNotes />}
+        {view === 'demo'       && (
           <DemoSeeder
             setVagas={setVagas}
             setFaculdades={setFaculdades}
